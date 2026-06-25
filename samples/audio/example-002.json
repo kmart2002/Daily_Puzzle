@@ -1,0 +1,166 @@
+{
+  "annotation_id": "AUD-20240315-0002",
+  "schema_version": "1.0.0",
+  "created_at": "2024-03-15T13:30:00Z",
+  "annotator": "marty-kahn",
+  "tool": {
+    "name": "Ardour",
+    "version": "8.1.0",
+    "platform": "Linux",
+    "project_file": "session-20240315-podcast.ardour"
+  },
+  "source_file": {
+    "reference_id": "src-e1b5d3c7",
+    "duration_seconds": 2847.0,
+    "sample_rate": 48000,
+    "bit_depth": 24,
+    "channels": 1,
+    "format": "WAV"
+  },
+  "track_type": "voice_podcast",
+  "tempo_bpm": 0,
+  "key": "not_applicable",
+  "time_signature": {
+    "numerator": 0,
+    "denominator": 0
+  },
+  "region": {
+    "start_seconds": 142.0,
+    "end_seconds": 2705.0,
+    "duration_seconds": 2563.0
+  },
+  "effects_chain": [
+    {
+      "slot": 1,
+      "plugin_name": "LSP High Pass Filter x2 Mono",
+      "plugin_type": "EQ",
+      "enabled": true,
+      "key_parameters": {
+        "frequency_hz": 120,
+        "slope_db_oct": 24,
+        "mode": "butterworth"
+      }
+    },
+    {
+      "slot": 2,
+      "plugin_name": "LSP Parametric EQ x8 Mono",
+      "plugin_type": "EQ",
+      "enabled": true,
+      "key_parameters": {
+        "band_1_type": "bell",
+        "band_1_frequency_hz": 240,
+        "band_1_gain_db": -2.5,
+        "band_1_q": 1.4,
+        "band_2_type": "bell",
+        "band_2_frequency_hz": 1800,
+        "band_2_gain_db": 1.0,
+        "band_2_q": 0.9,
+        "band_3_type": "bell",
+        "band_3_frequency_hz": 5000,
+        "band_3_gain_db": 1.5,
+        "band_3_q": 1.1
+      }
+    },
+    {
+      "slot": 3,
+      "plugin_name": "LSP De-esser Mono",
+      "plugin_type": "de-esser",
+      "enabled": true,
+      "key_parameters": {
+        "detection_frequency_hz": 7200,
+        "threshold_db": -28,
+        "ratio": 6,
+        "attack_ms": 1.0,
+        "release_ms": 30
+      }
+    },
+    {
+      "slot": 4,
+      "plugin_name": "Calf Compressor",
+      "plugin_type": "compressor",
+      "enabled": true,
+      "key_parameters": {
+        "threshold_db": -22,
+        "ratio": 3.5,
+        "attack_ms": 8,
+        "release_ms": 150,
+        "knee_db": 3,
+        "makeup_gain_db": 5,
+        "detection": "rms"
+      }
+    },
+    {
+      "slot": 5,
+      "plugin_name": "LSP Noise Gate Mono",
+      "plugin_type": "gate",
+      "enabled": true,
+      "key_parameters": {
+        "threshold_db": -52,
+        "attack_ms": 5,
+        "hold_ms": 50,
+        "release_ms": 200,
+        "reduction_db": -80
+      }
+    },
+    {
+      "slot": 6,
+      "plugin_name": "LSP Limiter Mono",
+      "plugin_type": "limiter",
+      "enabled": true,
+      "key_parameters": {
+        "threshold_db": -3.0,
+        "lookahead_ms": 2.0,
+        "attack_ms": 0.5,
+        "release_ms": 40
+      }
+    }
+  ],
+  "mix_levels": {
+    "fader_db": 0.0,
+    "pan": 0.0,
+    "send_levels": [],
+    "peak_db": -3.0,
+    "integrated_lufs": -16.8
+  },
+  "noise_events": [
+    {
+      "start_seconds": 142.0,
+      "end_seconds": 163.5,
+      "noise_type": "room_noise",
+      "action": "removed",
+      "severity": "minor"
+    },
+    {
+      "start_seconds": 487.2,
+      "end_seconds": 487.8,
+      "noise_type": "click",
+      "action": "removed",
+      "severity": "moderate"
+    },
+    {
+      "start_seconds": 1204.0,
+      "end_seconds": 1204.5,
+      "noise_type": "breath",
+      "action": "reduced",
+      "severity": "minor"
+    },
+    {
+      "start_seconds": 2012.3,
+      "end_seconds": 2013.1,
+      "noise_type": "plosive",
+      "action": "reduced",
+      "severity": "moderate"
+    },
+    {
+      "start_seconds": 2562.0,
+      "end_seconds": 2580.0,
+      "noise_type": "room_noise",
+      "action": "removed",
+      "severity": "minor"
+    }
+  ],
+  "editorial_notes": "Solo podcast recording, single condenser microphone, home studio with moderate room reflections. Raw recording was 47 minutes 27 seconds; edited to 42 minutes 43 seconds by removing: 2 false starts (top and tail), 8 extended filler-word sequences ('um', 'uh'), 1 phone notification sound at 23:41, and 3 sections where the host went significantly off-topic. High-pass at 120 Hz eliminates HVAC rumble. Parametric EQ: -2.5 dB at 240 Hz removes the boxy resonance characteristic of the recording room, +1 dB at 1800 Hz adds presence for voice intelligibility, +1.5 dB at 5 kHz adds air and clarity without introducing sibilance. De-esser clamps the 7.2 kHz sibilance range which was occasionally harsh on the 'S' and 'C' sounds. Compressor at 3.5:1 controls dynamic range without sounding over-processed — RMS detection chosen over peak for smoother result on voice. Gate set very low (-52 dB) to only mute true silence, not quiet speech. Final integrated loudness -16.8 LUFS is appropriate for podcast distribution (Apple Podcasts target: -16 LUFS).",
+  "quality_rating": 4,
+  "accepted": true,
+  "tags": ["podcast", "voice", "solo", "home_studio", "condenser_mic", "interview_style", "streaming_ready", "Ardour"]
+}

@@ -1,0 +1,51 @@
+{
+  "annotation_id": "VID-20240315-0001",
+  "schema_version": "1.0.0",
+  "created_at": "2024-03-15T14:22:00Z",
+  "annotator": "marty-kahn",
+  "tool": {
+    "name": "Shotcut",
+    "version": "23.11.29",
+    "platform": "Linux",
+    "project_file": "project-20240315-001.mlt"
+  },
+  "source_file": {
+    "reference_id": "src-f3a7c2e1",
+    "duration_seconds": 342.5,
+    "frame_rate": 29.97,
+    "resolution": { "width": 1920, "height": 1080 },
+    "codec": "H.264"
+  },
+  "edit_type": "fine_cut",
+  "clip": {
+    "in_point": {
+      "seconds": 83.17,
+      "frame": 2490,
+      "timecode": "00:01:23:05"
+    },
+    "out_point": {
+      "seconds": 91.64,
+      "frame": 2745,
+      "timecode": "00:01:31:19"
+    },
+    "duration_seconds": 8.47,
+    "timeline_position": {
+      "start_seconds": 47.3,
+      "track": "V1"
+    }
+  },
+  "transition": {
+    "type": "cut",
+    "duration_frames": 1,
+    "easing": "linear"
+  },
+  "editorial_notes": "Selected this take over takes 1 and 3 because the subject's eyeline stays consistent with the preceding wide shot and their hand gesture completes naturally within the clip window. Takes 1 and 3 were rejected (see VID-20240315-0003, VID-20240315-0005) due to a jump in framing caused by the camera operator adjusting mid-take. Cut placed on the downbeat of the subject's spoken sentence to allow the edit to breathe before the next cut. Rough cut had this section running 14 seconds; trimmed to 8.47s to maintain pacing established in the first act.",
+  "pacing_context": {
+    "position_in_sequence": "mid",
+    "cut_rhythm": "medium",
+    "preceded_by": "cut"
+  },
+  "quality_rating": 4,
+  "accepted": true,
+  "tags": ["interview", "talking_head", "indoor", "single_camera", "natural_light", "fine_cut"]
+}

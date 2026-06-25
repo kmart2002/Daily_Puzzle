@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marty Kahn — Media AI Training Data Specialist</title>
+  <meta name="description" content="Professional media annotation and AI training dataset creation specialist. High-quality labeled video and audio datasets for AI/ML pipelines using Shotcut, OpenShot, Lightworks, LMMS, and Ardour." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    /* Inline supplement: syntax highlighting for JSON in the samples section */
+    .json-key    { color: #48cae4; }
+    .json-string { color: #a8e6cf; }
+    .json-number { color: #f9c74f; }
+    .json-bool   { color: #f77f00; }
+    .json-null   { color: #aaa; }
+    .json-punct  { color: #8ab4cc; }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────────────────── -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">marty<span>kahn</span>.com</div>
+    <ul class="nav-links">
+      <li><a href="#tools">Tools</a></li>
+      <li><a href="#what-i-do">Process</a></li>
+      <li><a href="#samples">Samples</a></li>
+      <li><a href="#workflows">Workflows</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ── Hero ───────────────────────────────────────────── -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-badge">Available for AI Training Projects</div>
+
+    <h1 class="hero-title">Media AI Training<br />Data Specialist</h1>
+
+    <p class="hero-tagline">
+      I create high-quality, structured annotation datasets from real video and audio
+      editing sessions — the kind of ground-truth labeled data that AI models need to
+      learn editorial judgment, not just pattern-match on raw pixels.
+    </p>
+
+    <div class="hero-cta">
+      <a href="#samples" class="btn btn-primary">See Sample Annotations</a>
+      <a href="https://github.com/martykahn/media-ai-pipeline" class="btn btn-outline">View GitHub Repo</a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-number">2</div>
+        <div class="stat-label">Annotation Schemas</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">6</div>
+        <div class="stat-label">Professional Tools</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">4</div>
+        <div class="stat-label">Workflow Guides</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">100%</div>
+        <div class="stat-label">Schema-Validated</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Tools Section ──────────────────────────────────── -->
+<section id="tools">
+  <div class="container">
+    <div class="section-label">Toolchain</div>
+    <h2 class="section-title">Professional Editing Tools</h2>
+    <p class="section-intro">
+      Every tool in this pipeline was chosen because its native project format is parseable —
+      meaning editorial decisions can be extracted programmatically and turned into structured
+      training data without guesswork.
+    </p>
+
+    <div class="tools-grid">
+
+      <!-- Shotcut -->
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon video">🎬</div>
+          <div>
+            <div class="tool-name">Shotcut</div>
+            <div class="tool-category video">Video</div>
+          </div>
+        </div>
+        <p class="tool-description">
+          MLT-based open-source NLE with an XML project format that exposes every clip's
+          in/out points, filter chain, and timeline position. Ideal for frame-accurate cut
+          annotation and three-way color grading datasets.
+        </p>
+        <ul class="tool-features">
+          <li>MLT XML export</li>
+          <li>Three-way color grade</li>
+          <li>Frame-accurate trim</li>
+          <li>60+ video filters</li>
+        </ul>
+      </div>
+
+      <!-- OpenShot -->
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon video">🎞</div>
+          <div>
+            <div class="tool-name">OpenShot</div>
+            <div class="tool-category video">Video</div>
+          </div>
+        </div>
+        <p class="tool-description">
+          Python-backed NLE with a native JSON project format — the most directly
+          machine-readable of any NLE in this pipeline. Supports batch annotation extraction
+          via the <code>openshot</code> Python library.
+        </p>
+        <ul class="tool-features">
+          <li>Native JSON format</li>
+          <li>Python API access</li>
+          <li>Transition library</li>
+          <li>Keyframe animation</li>
+        </ul>
+      </div>
+
+      <!-- Lightworks -->
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon video">📽</div>
+          <div>
+            <div class="tool-name">Lightworks</div>
+            <div class="tool-category video">Video</div>
+          </div>
+        </div>
+        <p class="tool-description">
+          Professional broadcast NLE used on major film productions. EDL (Edit Decision List)
+          export provides frame-accurate cut-point data in an industry-standard format.
+          Preferred for narrative and broadcast-style editing datasets.
+        </p>
+        <ul class="tool-features">
+          <li>EDL export</li>
+          <li>Broadcast-grade tools</li>
+          <li>Multi-cam support</li>
+          <li>4K / 8K capable</li>
+        </ul>
+      </div>
+
+      <!-- LMMS -->
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon audio">🎹</div>
+          <div>
+            <div class="tool-name">LMMS</div>
+            <div class="tool-category audio">Audio</div>
+          </div>
+        </div>
+        <p class="tool-description">
+          Open-source DAW combining a piano-roll sequencer, Beat+Bassline editor, and
+          ZynAddSubFX synthesizer. MMP XML project files expose tempo, key, note data,
+          and full FX chain configuration — essential for music generation training data.
+        </p>
+        <ul class="tool-features">
+          <li>MMP XML format</li>
+          <li>ZynAddSubFX synth</li>
+          <li>Beat+Bassline editor</li>
+          <li>LV2 plugin host</li>
+        </ul>
+      </div>
+
+      <!-- Ardour -->
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon audio">🎚</div>
+          <div>
+            <div class="tool-name">Ardour</div>
+            <div class="tool-category audio">Audio</div>
+          </div>
+        </div>
+        <p class="tool-description">
+          Professional DAW built for demanding multi-track recording and post-production.
+          Session XML captures full routing graphs, LV2/VST plugin chains, automation lanes,
+          and region edits — the ground truth for voice and podcast training data.
+        </p>
+        <ul class="tool-features">
+          <li>Session XML format</li>
+          <li>Non-destructive editing</li>
+          <li>LV2/VST plugin chains</li>
+          <li>EBU R128 metering</li>
+        </ul>
+      </div>
+
+      <!-- LSP/Calf Plugins -->
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon audio">🔌</div>
+          <div>
+            <div class="tool-name">LSP &amp; Calf Plugins</div>
+            <div class="tool-category audio">Audio</div>
+          </div>
+        </div>
+        <p class="tool-description">
+          Open-source LV2 plugin suites used across LMMS and Ardour sessions. Consistent
+          parameter naming across projects makes cross-session effects-chain comparison
+          meaningful — critical for training signal-processing models.
+        </p>
+        <ul class="tool-features">
+          <li>Parametric EQ</li>
+          <li>Multi-band compressor</li>
+          <li>De-esser</li>
+          <li>Noise gate + limiter</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── What I Do ──────────────────────────────────────── -->
+<section id="what-i-do">
+  <div class="container">
+    <div class="section-label">Process</div>
+    <h2 class="section-title">The Annotation Workflow</h2>
+    <p class="section-intro">
+      Raw media files are not training data. The editorial decisions made during production —
+      what to cut, where to cut it, why it was rejected — are the actual training signal.
+      Here's how those decisions get captured and structured.
+    </p>
+
+    <div class="process-grid">
+
+      <div class="process-step">
+        <div class="step-number">01</div>
+        <div class="step-title">Ingest &amp; Classify</div>
+        <p class="step-desc">
+          Source media is catalogued with technical metadata: frame rate, resolution, codec,
+          sample rate, bit depth. Each take gets a unique reference ID. Problem takes are
+          flagged before editing begins — not after.
+        </p>
+      </div>
+
+      <div class="process-step">
+        <div class="step-number">02</div>
+        <div class="step-title">Edit in the NLE / DAW</div>
+        <p class="step-desc">
+          Edits are made in the appropriate tool (Shotcut for rough cuts, OpenShot for color,
+          LMMS for music composition, Ardour for voice). Every decision is made the way a
+          professional editor would make it — not staged for the dataset.
+        </p>
+      </div>
+
+      <div class="process-step">
+        <div class="step-number">03</div>
+        <div class="step-title">Annotate the Decision</div>
+        <p class="step-desc">
+          Each editorial decision is written to a JSON annotation file conforming to the
+          schema. In/out points, transition types, color grade parameters, effects chains,
+          and mix levels are all captured with exact values — no rounding, no estimates.
+        </p>
+      </div>
+
+      <div class="process-step">
+        <div class="step-number">04</div>
+        <div class="step-title">Quality Gate</div>
+        <p class="step-desc">
+          Every annotation is rated 1-5. Only ratings ≥ 3 are eligible for
+          <code>accepted: true</code>. Rejected annotations are kept in the dataset with
+          a controlled-vocabulary <code>rejection_reason</code> — negative examples matter.
+        </p>
+      </div>
+
+      <div class="process-step">
+        <div class="step-number">05</div>
+        <div class="step-title">Schema Validation</div>
+        <p class="step-desc">
+          All annotations are validated against the JSON Schema before commit. Required
+          fields, enum constraints, type constraints, and conditional requirements (e.g.,
+          <code>rejection_reason</code> required when <code>accepted: false</code>) are
+          all enforced programmatically.
+        </p>
+      </div>
+
+      <div class="process-step">
+        <div class="step-number">06</div>
+        <div class="step-title">Dataset Diversity Review</div>
+        <p class="step-desc">
+          Before each batch commit, annotations are reviewed for diversity: tool distribution,
+          edit type coverage, parameter value spread. A dataset where 80% of annotations are
+          the same edit type is not useful training data — gaps are filled before delivery.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Sample Annotations ─────────────────────────────── -->
+<section id="samples">
+  <div class="container">
+    <div class="section-label">Examples</div>
+    <h2 class="section-title">Sample Annotations</h2>
+    <p class="section-intro">
+      These are real annotation examples from this repository — not mock data.
+      Each JSON snippet validates against the project schema.
+    </p>
+
+    <div class="samples-grid">
+
+      <!-- Video Sample 1 -->
+      <div class="sample-card">
+        <div class="sample-header">
+          <div class="sample-title">Fine Cut — Dialogue (Shotcut)</div>
+          <div class="sample-badge video">Video</div>
+        </div>
+        <pre class="code-block"><code>{
+  <span class="json-key">"annotation_id"</span><span class="json-punct">:</span> <span class="json-string">"VID-20240315-0001"</span><span class="json-punct">,</span>
+  <span class="json-key">"edit_type"</span><span class="json-punct">:</span> <span class="json-string">"fine_cut"</span><span class="json-punct">,</span>
+  <span class="json-key">"tool"</span><span class="json-punct">: {</span>
+    <span class="json-key">"name"</span><span class="json-punct">:</span> <span class="json-string">"Shotcut"</span><span class="json-punct">,</span>
+    <span class="json-key">"version"</span><span class="json-punct">:</span> <span class="json-string">"23.11.29"</span>
+  <span class="json-punct">},</span>
+  <span class="json-key">"clip"</span><span class="json-punct">: {</span>
+    <span class="json-key">"in_point"</span><span class="json-punct">: {</span>
+      <span class="json-key">"seconds"</span><span class="json-punct">:</span> <span class="json-number">83.17</span><span class="json-punct">,</span>
+      <span class="json-key">"timecode"</span><span class="json-punct">:</span> <span class="json-string">"00:01:23:05"</span>
+    <span class="json-punct">},</span>
+    <span class="json-key">"out_point"</span><span class="json-punct">: {</span>
+      <span class="json-key">"seconds"</span><span class="json-punct">:</span> <span class="json-number">91.64</span><span class="json-punct">,</span>
+      <span class="json-key">"timecode"</span><span class="json-punct">:</span> <span class="json-string">"00:01:31:19"</span>
+    <span class="json-punct">}</span>
+  <span class="json-punct">},</span>
+  <span class="json-key">"quality_rating"</span><span class="json-punct">:</span> <span class="json-number">4</span><span class="json-punct">,</span>
+  <span class="json-key">"accepted"</span><span class="json-punct">:</span> <span class="json-bool">true</span>
+<span class="json-punct">}</span></code></pre>
+      </div>
+
+      <!-- Video Sample 2 -->
+      <div class="sample-card">
+        <div class="sample-header">
+          <div class="sample-title">Color Grade — Warm/Cool Split (OpenShot)</div>
+          <div class="sample-badge video">Video</div>
+        </div>
+        <pre class="code-block"><code>{
+  <span class="json-key">"annotation_id"</span><span class="json-punct">:</span> <span class="json-string">"VID-20240315-0002"</span><span class="json-punct">,</span>
+  <span class="json-key">"edit_type"</span><span class="json-punct">:</span> <span class="json-string">"color_grade"</span><span class="json-punct">,</span>
+  <span class="json-key">"color_grade"</span><span class="json-punct">: {</span>
+    <span class="json-key">"lift"</span><span class="json-punct">: {</span>
+      <span class="json-key">"r"</span><span class="json-punct">:</span> <span class="json-number">-0.04</span><span class="json-punct">,</span>
+      <span class="json-key">"b"</span><span class="json-punct">:</span> <span class="json-number">0.06</span>
+    <span class="json-punct">},</span>
+    <span class="json-key">"gain"</span><span class="json-punct">: {</span>
+      <span class="json-key">"r"</span><span class="json-punct">:</span> <span class="json-number">1.08</span><span class="json-punct">,</span>
+      <span class="json-key">"b"</span><span class="json-punct">:</span> <span class="json-number">0.94</span>
+    <span class="json-punct">},</span>
+    <span class="json-key">"saturation"</span><span class="json-punct">:</span> <span class="json-number">1.15</span><span class="json-punct">,</span>
+    <span class="json-key">"temperature_kelvin"</span><span class="json-punct">:</span> <span class="json-number">5200</span>
+  <span class="json-punct">},</span>
+  <span class="json-key">"quality_rating"</span><span class="json-punct">:</span> <span class="json-number">5</span><span class="json-punct">,</span>
+  <span class="json-key">"accepted"</span><span class="json-punct">:</span> <span class="json-bool">true</span>
+<span class="json-punct">}</span></code></pre>
+      </div>
+
+      <!-- Audio Sample -->
+      <div class="sample-card">
+        <div class="sample-header">
+          <div class="sample-title">Podcast Voice Edit — Effects Chain (Ardour)</div>
+          <div class="sample-badge audio">Audio</div>
+        </div>
+        <pre class="code-block"><code>{
+  <span class="json-key">"annotation_id"</span><span class="json-punct">:</span> <span class="json-string">"AUD-20240315-0002"</span><span class="json-punct">,</span>
+  <span class="json-key">"track_type"</span><span class="json-punct">:</span> <span class="json-string">"voice_podcast"</span><span class="json-punct">,</span>
+  <span class="json-key">"effects_chain"</span><span class="json-punct">: [</span>
+    <span class="json-punct">{</span>
+      <span class="json-key">"slot"</span><span class="json-punct">:</span> <span class="json-number">1</span><span class="json-punct">,</span>
+      <span class="json-key">"plugin_name"</span><span class="json-punct">:</span> <span class="json-string">"LSP High Pass Filter"</span><span class="json-punct">,</span>
+      <span class="json-key">"plugin_type"</span><span class="json-punct">:</span> <span class="json-string">"EQ"</span><span class="json-punct">,</span>
+      <span class="json-key">"key_parameters"</span><span class="json-punct">: {</span>
+        <span class="json-key">"frequency_hz"</span><span class="json-punct">:</span> <span class="json-number">120</span>
+      <span class="json-punct">}</span>
+    <span class="json-punct">},</span>
+    <span class="json-punct">{</span>
+      <span class="json-key">"slot"</span><span class="json-punct">:</span> <span class="json-number">2</span><span class="json-punct">,</span>
+      <span class="json-key">"plugin_name"</span><span class="json-punct">:</span> <span class="json-string">"LSP De-esser Mono"</span><span class="json-punct">,</span>
+      <span class="json-key">"plugin_type"</span><span class="json-punct">:</span> <span class="json-string">"de-esser"</span><span class="json-punct">,</span>
+      <span class="json-key">"key_parameters"</span><span class="json-punct">: {</span>
+        <span class="json-key">"threshold_db"</span><span class="json-punct">:</span> <span class="json-number">-28</span><span class="json-punct">,</span>
+        <span class="json-key">"ratio"</span><span class="json-punct">:</span> <span class="json-number">6</span>
+      <span class="json-punct">}</span>
+    <span class="json-punct">}</span>
+  <span class="json-punct">],</span>
+  <span class="json-key">"mix_levels"</span><span class="json-punct">: {</span>
+    <span class="json-key">"fader_db"</span><span class="json-punct">:</span> <span class="json-number">0.0</span><span class="json-punct">,</span>
+    <span class="json-key">"integrated_lufs"</span><span class="json-punct">:</span> <span class="json-number">-16.8</span>
+  <span class="json-punct">}</span>
+<span class="json-punct">}</span></code></pre>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Workflows ───────────────────────────────────────── -->
+<section id="workflows">
+  <div class="container">
+    <div class="section-label">Documentation</div>
+    <h2 class="section-title">Tool Workflow Guides</h2>
+    <p class="section-intro">
+      Each guide explains how to use a specific tool to produce annotation-ready training
+      data — including what makes a good example, what makes a bad one, and how to extract
+      data programmatically from native project files.
+    </p>
+
+    <div class="workflow-grid">
+
+      <div class="workflow-card">
+        <div class="workflow-icon">🎬</div>
+        <div class="workflow-name">Shotcut</div>
+        <p class="workflow-desc">
+          Frame-accurate cut annotation using MLT XML. Covers in/out point capture,
+          transition type classification, three-way color corrector parameter extraction,
+          and automated parsing of <code>.mlt</code> project files.
+        </p>
+        <a href="../workflows/shotcut-workflow.md" class="workflow-link">
+          Read guide →
+        </a>
+      </div>
+
+      <div class="workflow-card">
+        <div class="workflow-icon">🎞</div>
+        <div class="workflow-name">OpenShot</div>
+        <p class="workflow-desc">
+          Two-pass annotation method using OpenShot's native JSON format. Includes
+          the OpenShot-to-schema transition type mapping table and a Python extractor
+          for <code>.osp</code> project files.
+        </p>
+        <a href="../workflows/openshot-workflow.md" class="workflow-link">
+          Read guide →
+        </a>
+      </div>
+
+      <div class="workflow-card">
+        <div class="workflow-icon">🎹</div>
+        <div class="workflow-name">LMMS</div>
+        <p class="workflow-desc">
+          Music annotation workflow: BPM/key/time-signature capture, instrument plugin
+          documentation, FX Mixer chain annotation, LUFS metering via ffmpeg,
+          and MMP XML parsing with Python.
+        </p>
+        <a href="../workflows/lmms-workflow.md" class="workflow-link">
+          Read guide →
+        </a>
+      </div>
+
+      <div class="workflow-card">
+        <div class="workflow-icon">🎚</div>
+        <div class="workflow-name">Ardour</div>
+        <p class="workflow-desc">
+          Three-pass voice editing workflow: structural edits, noise event identification,
+          and plugin chain documentation. Covers EBU R128 export and Ardour session
+          XML parsing for automated annotation seeding.
+        </p>
+        <a href="../workflows/ardour-workflow.md" class="workflow-link">
+          Read guide →
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Contact ─────────────────────────────────────────── -->
+<section id="contact">
+  <div class="container">
+    <div class="section-label">Contact</div>
+    <h2 class="section-title">Work With Me</h2>
+
+    <div class="contact-grid">
+      <div>
+        <p class="contact-intro">
+          I'm available for AI training data contracts, annotation pipeline consulting,
+          and media dataset curation projects. I work with video generation, music AI,
+          voice synthesis, and audio restoration teams.
+        </p>
+
+        <ul class="links-list">
+          <li>
+            <a href="https://github.com/martykahn/media-ai-pipeline" class="link-item">
+              <span class="link-icon">🐙</span>
+              <div>
+                <div class="link-label">GitHub Repository</div>
+                <div class="link-sub">martykahn/media-ai-pipeline</div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="https://martykahn.com" class="link-item">
+              <span class="link-icon">🌐</span>
+              <div>
+                <div class="link-label">Portfolio Site</div>
+                <div class="link-sub">martykahn.com</div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="mailto:martyskahn@gmail.com" class="link-item">
+              <span class="link-icon">✉</span>
+              <div>
+                <div class="link-label">Email</div>
+                <div class="link-sub">martyskahn@gmail.com</div>
+              </div>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="availability-card">
+        <div class="avail-status">
+          <span class="avail-dot"></span>Available for New Projects
+        </div>
+        <p class="avail-text">
+          I specialize in creating AI training datasets that are genuinely useful —
+          not bulk-exported media files with placeholder labels, but carefully
+          structured annotations that capture the editorial reasoning behind every
+          decision. The difference matters for model quality.
+        </p>
+        <p class="avail-text">
+          Deliverables always include schema documentation, validation scripts,
+          rejection logs (negative examples), and a diversity audit to confirm
+          the dataset covers the parameter space evenly.
+        </p>
+        <div class="skills-chips">
+          <span class="chip">Video Annotation</span>
+          <span class="chip">Audio Annotation</span>
+          <span class="chip">JSON Schema</span>
+          <span class="chip">Color Grading</span>
+          <span class="chip">Mix Engineering</span>
+          <span class="chip">LUFS Metering</span>
+          <span class="chip">ML Dataset Design</span>
+          <span class="chip">Python Extraction</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── Footer ─────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <p>
+      &copy; 2024 Marty Kahn &mdash;
+      <a href="https://github.com/martykahn/media-ai-pipeline">media-ai-pipeline</a> is open source under the MIT License.
+    </p>
+    <p style="margin-top:8px; font-size:0.78rem; color: var(--border);">
+      Built with Shotcut · OpenShot · Lightworks · LMMS · Ardour
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

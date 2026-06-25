@@ -1,0 +1,82 @@
+{
+  "annotation_id": "VID-20240315-0002",
+  "schema_version": "1.0.0",
+  "created_at": "2024-03-15T16:05:00Z",
+  "annotator": "marty-kahn",
+  "tool": {
+    "name": "OpenShot",
+    "version": "3.1.1",
+    "platform": "Linux",
+    "project_file": "project-20240315-002.osp"
+  },
+  "source_file": {
+    "reference_id": "src-d8b1e0a4",
+    "duration_seconds": 188.0,
+    "frame_rate": 24,
+    "resolution": { "width": 3840, "height": 2160 },
+    "codec": "H.265"
+  },
+  "edit_type": "color_grade",
+  "clip": {
+    "in_point": {
+      "seconds": 0.0,
+      "frame": 0,
+      "timecode": "00:00:00:00"
+    },
+    "out_point": {
+      "seconds": 188.0,
+      "frame": 4512,
+      "timecode": "00:03:08:00"
+    },
+    "duration_seconds": 188.0,
+    "timeline_position": {
+      "start_seconds": 0.0,
+      "track": "V1"
+    }
+  },
+  "transition": {
+    "type": "none",
+    "duration_frames": 0,
+    "easing": "linear"
+  },
+  "color_grade": {
+    "lift": {
+      "r": -0.04,
+      "g": -0.02,
+      "b": 0.06,
+      "master": -0.02
+    },
+    "gamma": {
+      "r": 0.97,
+      "g": 1.00,
+      "b": 1.06,
+      "master": 1.01
+    },
+    "gain": {
+      "r": 1.08,
+      "g": 1.02,
+      "b": 0.94,
+      "master": 1.03
+    },
+    "saturation": 1.15,
+    "contrast": 1.08,
+    "temperature_kelvin": 5200,
+    "tint": -3,
+    "lut_applied": "None",
+    "hsl_curves": {
+      "hue_vs_hue": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+      "hue_vs_sat": [0.0, 0.0, 0.0, 0.05, 0.0, -0.08, 0.0],
+      "hue_vs_lum": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+      "lum_vs_sat": [-0.05, 0.0, 0.02, 0.0, -0.04]
+    }
+  },
+  "editorial_notes": "Source footage was exposed with a flat/log-like profile to preserve highlight detail in the outdoor windows. This grade restores a natural contrast curve and adds a slight warm-to-cool split: warm highlights (gain.r elevated, gain.b reduced) against slightly cool shadows (lift.b elevated). The hue_vs_sat curve boosts skin-tone saturation modestly (+0.05 in the orange hue band) and desaturates cyans (-0.08) to prevent the sky from competing with the subject. Lum_vs_sat reduces saturation in the very darkest and very brightest areas to keep the image clean at extremes. Temperature set to 5200K to correct the mixed indoor/window light source; slight negative tint corrects for the green cast from fluorescent practicals.",
+  "pacing_context": {
+    "position_in_sequence": "opening",
+    "cut_rhythm": "slow",
+    "preceded_by": "fade"
+  },
+  "quality_rating": 5,
+  "accepted": true,
+  "tags": ["color_grade", "outdoor_window", "log_footage", "warm_cool_split", "skin_tone", "4K"]
+}

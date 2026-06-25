@@ -1,0 +1,350 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/martykahn/media-ai-pipeline/schemas/audio-edit-annotation.json",
+  "title": "AudioEditAnnotation",
+  "description": "Schema for annotating a single audio editing decision for use as AI training data. Each annotation represents one editorial unit: a track arrangement, a mix decision, an effects chain, or a voice edit applied within a DAW session.",
+  "type": "object",
+  "required": [
+    "annotation_id",
+    "schema_version",
+    "created_at",
+    "tool",
+    "source_file",
+    "track_type",
+    "tempo_bpm",
+    "key",
+    "time_signature",
+    "region",
+    "mix_levels",
+    "quality_rating",
+    "accepted"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "annotation_id": {
+      "type": "string",
+      "pattern": "^AUD-[0-9]{8}-[0-9]{4}$",
+      "description": "Unique identifier for this annotation. Format: AUD-YYYYMMDD-NNNN",
+      "examples": ["AUD-20240315-0001"]
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "annotator": {
+      "type": "string"
+    },
+    "tool": {
+      "type": "object",
+      "required": ["name", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": ["LMMS", "Ardour", "Audacity", "Reaper", "GarageBand", "Other"]
+        },
+        "version": {
+          "type": "string",
+          "examples": ["1.2.2", "8.1.0", "3.4.2"]
+        },
+        "platform": {
+          "type": "string",
+          "enum": ["Windows", "macOS", "Linux"]
+        },
+        "project_file": {
+          "type": "string",
+          "description": "Anonymized reference to the DAW session or project file.",
+          "examples": ["session-20240315-001.als", "project-20240315-001.mmp"]
+        }
+      }
+    },
+    "source_file": {
+      "type": "object",
+      "required": ["reference_id", "duration_seconds", "sample_rate", "bit_depth", "channels"],
+      "additionalProperties": false,
+      "properties": {
+        "reference_id": {
+          "type": "string",
+          "examples": ["src-b7e4a2f1", "session-20240315-MAIN"]
+        },
+        "duration_seconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "sample_rate": {
+          "type": "integer",
+          "enum": [22050, 44100, 48000, 88200, 96000, 192000],
+          "description": "Sample rate of the source audio in Hz."
+        },
+        "bit_depth": {
+          "type": "integer",
+          "enum": [16, 24, 32],
+          "description": "Bit depth of the source audio."
+        },
+        "channels": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32,
+          "description": "Number of audio channels (1=mono, 2=stereo, >2=surround/multitrack)."
+        },
+        "format": {
+          "type": "string",
+          "enum": ["WAV", "AIFF", "FLAC", "MP3", "OGG", "CAF", "BWF"],
+          "description": "Audio file format."
+        }
+      }
+    },
+    "track_type": {
+      "type": "string",
+      "enum": [
+        "music_full_mix",
+        "music_stem_drums",
+        "music_stem_bass",
+        "music_stem_melody",
+        "music_stem_harmony",
+        "music_stem_synth",
+        "foley",
+        "sfx",
+        "voice_dialogue",
+        "voice_podcast",
+        "voice_narration",
+        "voice_voiceover",
+        "ambience",
+        "room_tone"
+      ],
+      "description": "The type of audio content this annotation covers."
+    },
+    "tempo_bpm": {
+      "type": "number",
+      "minimum": 20,
+      "maximum": 400,
+      "description": "Tempo in beats per minute. For variable-tempo pieces, use the dominant or average tempo. For non-musical content (dialogue, SFX), use 0 and note it in editorial_notes."
+    },
+    "key": {
+      "type": "string",
+      "enum": [
+        "C_major", "C_minor", "C#_major", "C#_minor", "Db_major", "Db_minor",
+        "D_major", "D_minor", "D#_major", "D#_minor", "Eb_major", "Eb_minor",
+        "E_major", "E_minor",
+        "F_major", "F_minor", "F#_major", "F#_minor", "Gb_major", "Gb_minor",
+        "G_major", "G_minor", "G#_major", "G#_minor", "Ab_major", "Ab_minor",
+        "A_major", "A_minor", "A#_major", "A#_minor", "Bb_major", "Bb_minor",
+        "B_major", "B_minor",
+        "atonal", "not_applicable"
+      ],
+      "description": "Musical key. Use 'not_applicable' for dialogue, foley, SFX, and ambience tracks."
+    },
+    "time_signature": {
+      "type": "object",
+      "description": "Meter of the piece. Use {numerator: 0, denominator: 0} for non-musical content.",
+      "required": ["numerator", "denominator"],
+      "additionalProperties": false,
+      "properties": {
+        "numerator": { "type": "integer", "minimum": 0 },
+        "denominator": { "type": "integer", "enum": [0, 2, 4, 8, 16] }
+      }
+    },
+    "region": {
+      "type": "object",
+      "description": "The time region within the session that this annotation covers.",
+      "required": ["start_seconds", "end_seconds"],
+      "additionalProperties": false,
+      "properties": {
+        "start_seconds": { "type": "number", "minimum": 0 },
+        "end_seconds": { "type": "number", "minimum": 0 },
+        "duration_seconds": { "type": "number", "minimum": 0 },
+        "bar_start": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Bar number where this region begins (if applicable)."
+        },
+        "bar_end": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Bar number where this region ends (if applicable)."
+        }
+      }
+    },
+    "effects_chain": {
+      "type": "array",
+      "description": "Ordered list of effects/plugins applied to this track or region. Order matters — it reflects the signal chain from input to output.",
+      "items": {
+        "type": "object",
+        "required": ["slot", "plugin_name", "plugin_type", "enabled"],
+        "additionalProperties": false,
+        "properties": {
+          "slot": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Position in the signal chain (1 = first, closest to source)."
+          },
+          "plugin_name": {
+            "type": "string",
+            "description": "Name of the plugin or built-in effect.",
+            "examples": ["ZynAddSubFX", "Calf Compressor", "LSP Parametric EQ", "GVERB", "Calf Reverb"]
+          },
+          "plugin_type": {
+            "type": "string",
+            "enum": ["EQ", "compressor", "limiter", "reverb", "delay", "distortion", "chorus", "flanger", "phaser", "gate", "expander", "de-esser", "pitch_shift", "time_stretch", "noise_reduction", "saturation", "exciter", "multi_band_compressor", "synth", "other"]
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "bypass_reason": {
+            "type": "string",
+            "description": "If enabled=false, why was this plugin bypassed?",
+            "examples": ["A/B comparison", "CPU limit", "not needed for this section"]
+          },
+          "key_parameters": {
+            "type": "object",
+            "description": "The most important parameters of this plugin. Use the plugin's own parameter names.",
+            "additionalProperties": {
+              "oneOf": [
+                { "type": "number" },
+                { "type": "string" },
+                { "type": "boolean" }
+              ]
+            },
+            "examples": [
+              { "threshold_db": -18, "ratio": 4, "attack_ms": 10, "release_ms": 80, "makeup_gain_db": 3 },
+              { "frequency_hz": 80, "q": 0.7, "gain_db": -6, "type": "highpass" }
+            ]
+          }
+        }
+      }
+    },
+    "mix_levels": {
+      "type": "object",
+      "description": "Level and positioning information for this track in the mix.",
+      "required": ["fader_db", "pan"],
+      "additionalProperties": false,
+      "properties": {
+        "fader_db": {
+          "type": "number",
+          "minimum": -120,
+          "maximum": 12,
+          "description": "Track fader level in dBFS. 0 dB = unity gain."
+        },
+        "pan": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "description": "Stereo pan position. -1.0 = hard left, 0 = center, 1.0 = hard right."
+        },
+        "send_levels": {
+          "type": "array",
+          "description": "Aux/bus send levels for this track.",
+          "items": {
+            "type": "object",
+            "required": ["bus_name", "level_db"],
+            "properties": {
+              "bus_name": { "type": "string", "examples": ["Reverb Bus", "Delay Bus", "Master"] },
+              "level_db": { "type": "number", "minimum": -120, "maximum": 12 }
+            }
+          }
+        },
+        "peak_db": {
+          "type": "number",
+          "maximum": 0,
+          "description": "Measured peak level of this region in dBFS after processing."
+        },
+        "integrated_lufs": {
+          "type": "number",
+          "description": "Integrated loudness of this region in LUFS (EBU R128). Typical targets: -23 LUFS broadcast, -14 LUFS streaming."
+        }
+      }
+    },
+    "pitch_corrections": {
+      "type": "array",
+      "description": "List of pitch correction events applied, if any.",
+      "items": {
+        "type": "object",
+        "required": ["start_seconds", "end_seconds", "semitones_corrected"],
+        "properties": {
+          "start_seconds": { "type": "number", "minimum": 0 },
+          "end_seconds": { "type": "number", "minimum": 0 },
+          "semitones_corrected": { "type": "number", "minimum": -24, "maximum": 24 },
+          "method": {
+            "type": "string",
+            "enum": ["auto_tune", "manual_correction", "formant_shift", "time_stretch"]
+          }
+        }
+      }
+    },
+    "noise_events": {
+      "type": "array",
+      "description": "Identified noise or problem events in the original source and how they were handled.",
+      "items": {
+        "type": "object",
+        "required": ["start_seconds", "end_seconds", "noise_type", "action"],
+        "properties": {
+          "start_seconds": { "type": "number", "minimum": 0 },
+          "end_seconds": { "type": "number", "minimum": 0 },
+          "noise_type": {
+            "type": "string",
+            "enum": ["room_noise", "breath", "click", "hum_60hz", "hum_50hz", "clipping", "wind", "traffic", "keyboard", "clothing_rustle", "plosive", "sibilance", "other"]
+          },
+          "action": {
+            "type": "string",
+            "enum": ["removed", "reduced", "left_in", "replaced_with_room_tone", "region_deleted"]
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["minor", "moderate", "severe"]
+          }
+        }
+      }
+    },
+    "editorial_notes": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Free-text notes explaining the mixing or editing decisions made. Include references to client brief or creative intent where applicable."
+    },
+    "quality_rating": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "1=unusable (clipping, severe noise), 2=poor (audible problems), 3=acceptable (usable with caveats), 4=good (clean, well-balanced), 5=exemplary (broadcast ready, strong creative choices)."
+    },
+    "accepted": {
+      "type": "boolean",
+      "description": "Whether this annotation is accepted for use in the training dataset."
+    },
+    "rejection_reason": {
+      "type": "string",
+      "enum": [
+        "clipping_distortion",
+        "noise_floor_too_high",
+        "phase_cancellation",
+        "tempo_inconsistency",
+        "key_mismatch",
+        "effects_chain_corrupted",
+        "metadata_incomplete",
+        "duration_too_short",
+        "duplicate_of_existing",
+        "copyrighted_sample",
+        "render_artifact",
+        "sample_rate_mismatch",
+        "annotator_error",
+        "other"
+      ],
+      "description": "Required when accepted=false. Use controlled vocabulary to enable systematic analysis."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true,
+      "examples": [["electronic", "lo-fi", "drums", "four-on-the-floor"]]
+    }
+  },
+  "if": {
+    "properties": { "accepted": { "const": false } }
+  },
+  "then": {
+    "required": ["rejection_reason"]
+  }
+}

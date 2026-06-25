@@ -1,0 +1,110 @@
+{
+  "annotation_id": "AUD-20240315-0001",
+  "schema_version": "1.0.0",
+  "created_at": "2024-03-15T10:45:00Z",
+  "annotator": "marty-kahn",
+  "tool": {
+    "name": "LMMS",
+    "version": "1.2.2",
+    "platform": "Linux",
+    "project_file": "project-20240315-001.mmp"
+  },
+  "source_file": {
+    "reference_id": "src-a9c3f7d2",
+    "duration_seconds": 214.0,
+    "sample_rate": 44100,
+    "bit_depth": 24,
+    "channels": 2,
+    "format": "WAV"
+  },
+  "track_type": "music_full_mix",
+  "tempo_bpm": 92,
+  "key": "A_minor",
+  "time_signature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "region": {
+    "start_seconds": 0.0,
+    "end_seconds": 214.0,
+    "duration_seconds": 214.0,
+    "bar_start": 1,
+    "bar_end": 82
+  },
+  "effects_chain": [
+    {
+      "slot": 1,
+      "plugin_name": "LSP Parametric EQ x16 Stereo",
+      "plugin_type": "EQ",
+      "enabled": true,
+      "key_parameters": {
+        "band_1_type": "highpass",
+        "band_1_frequency_hz": 30,
+        "band_1_slope_db_oct": 12,
+        "band_5_type": "bell",
+        "band_5_frequency_hz": 3200,
+        "band_5_gain_db": 1.5,
+        "band_5_q": 1.2,
+        "band_8_type": "high_shelf",
+        "band_8_frequency_hz": 10000,
+        "band_8_gain_db": 1.0
+      }
+    },
+    {
+      "slot": 2,
+      "plugin_name": "Calf Multi Band Compressor",
+      "plugin_type": "multi_band_compressor",
+      "enabled": true,
+      "key_parameters": {
+        "low_band_threshold_db": -24,
+        "low_band_ratio": 3,
+        "low_band_attack_ms": 40,
+        "low_band_release_ms": 200,
+        "mid_band_threshold_db": -20,
+        "mid_band_ratio": 2.5,
+        "mid_band_attack_ms": 15,
+        "mid_band_release_ms": 120,
+        "high_band_threshold_db": -18,
+        "high_band_ratio": 2,
+        "high_band_attack_ms": 8,
+        "high_band_release_ms": 80
+      }
+    },
+    {
+      "slot": 3,
+      "plugin_name": "Calf Stereo Tools",
+      "plugin_type": "other",
+      "enabled": true,
+      "key_parameters": {
+        "stereo_width": 1.15,
+        "mid_side_balance": 0.0,
+        "phase_flip_left": false,
+        "phase_flip_right": false
+      }
+    },
+    {
+      "slot": 4,
+      "plugin_name": "LSP Limiter Stereo",
+      "plugin_type": "limiter",
+      "enabled": true,
+      "key_parameters": {
+        "threshold_db": -1.0,
+        "lookahead_ms": 5.0,
+        "attack_ms": 0.5,
+        "release_ms": 50,
+        "knee_db": 0.5
+      }
+    }
+  ],
+  "mix_levels": {
+    "fader_db": 0.0,
+    "pan": 0.0,
+    "send_levels": [],
+    "peak_db": -1.0,
+    "integrated_lufs": -14.2
+  },
+  "editorial_notes": "Lo-fi hip-hop instrumental in A minor, 92 BPM. Primary production tools: ZynAddSubFX for the Rhodes-style electric piano melody (MIDI, 16 bars looped with variation), Beat+Bassline editor for the drum pattern (kick on 1 and 3, snare on 2 and 4, hi-hat 8ths with velocity humanization), and a sampled bass line using AudioFileProcessor. The multiband compressor is the key glue element: gentle settings on the mid band keep the piano and bass from masking each other, while the low band controls the kick punch without muddying the sub. Stereo width is expanded slightly (1.15) to give the mix air on headphones without causing phase issues in mono — checked with the mono fold button in Calf Stereo Tools. Final limiter set at -1 dBFS true peak to meet streaming platform requirements. Integrated loudness of -14.2 LUFS is within 0.2 of the Spotify -14 LUFS target.",
+  "quality_rating": 4,
+  "accepted": true,
+  "tags": ["lo-fi", "hip-hop", "instrumental", "A_minor", "92bpm", "streaming_ready", "LMMS", "ZynAddSubFX"]
+}
