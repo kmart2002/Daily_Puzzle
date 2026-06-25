@@ -698,6 +698,220 @@ nav {
   color: var(--teal-bright);
 }
 
+/* ── Annotation Builder Demo ────────────────────────────── */
+
+#demo { background: var(--surface); }
+
+.demo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.demo-toggle-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.demo-toggle {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.demo-toggle.active,
+.demo-toggle:hover {
+  background: var(--teal);
+  color: #000;
+  border-color: var(--teal);
+}
+
+.demo-form-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 6px;
+}
+
+.form-control {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 12px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.92rem;
+  transition: border-color 0.18s;
+  -webkit-appearance: none;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--teal);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-range {
+  width: 100%;
+  accent-color: var(--teal);
+  margin-top: 4px;
+}
+
+.accept-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  text-transform: none;
+  font-size: 0.88rem;
+  letter-spacing: 0;
+  color: var(--text);
+}
+
+.accept-row input[type="checkbox"] {
+  accent-color: var(--teal);
+  width: 16px;
+  height: 16px;
+}
+
+.plugin-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plugin-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.plugin-check input[type="checkbox"] {
+  accent-color: var(--teal);
+  width: 15px;
+  height: 15px;
+}
+
+.demo-output-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.output-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--navy);
+}
+
+.output-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-muted);
+}
+
+.copy-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 12px;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.copy-btn:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+.demo-code-block {
+  flex: 1;
+  padding: 20px;
+  margin: 0;
+  border-radius: 0;
+  border: none;
+  min-height: 420px;
+  overflow-y: auto;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  background: var(--navy);
+}
+
+.output-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--navy);
+}
+
+.valid-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4caf8a;
+  background: rgba(76, 175, 138, 0.12);
+  border: 1px solid rgba(76, 175, 138, 0.3);
+  border-radius: 100px;
+  padding: 3px 10px;
+}
+
+.output-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+@media (max-width: 900px) {
+  .demo-grid { grid-template-columns: 1fr; }
+  .demo-code-block { min-height: 280px; }
+}
+
 /* ── Footer ─────────────────────────────────────────────── */
 
 footer {

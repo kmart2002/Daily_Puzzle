@@ -33,6 +33,7 @@
       <li><a href="#tools">Tools</a></li>
       <li><a href="#what-i-do">Process</a></li>
       <li><a href="#samples">Samples</a></li>
+      <li><a href="#demo">Demo</a></li>
       <li><a href="#workflows">Workflows</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
@@ -409,6 +410,338 @@
     </div>
   </div>
 </section>
+
+<!-- ── Annotation Builder Demo ─────────────────────────── -->
+<section id="demo">
+  <div class="container">
+    <div class="section-label">Live Demo</div>
+    <h2 class="section-title">Annotation Builder</h2>
+    <p class="section-intro">
+      Fill in the fields below and watch a schema-valid JSON annotation generate in real time.
+      This is exactly the format used in the training dataset.
+    </p>
+
+    <div class="demo-grid">
+
+      <!-- Left: Form -->
+      <div class="demo-form-panel">
+
+        <!-- Media Type Toggle -->
+        <div class="demo-toggle-row">
+          <button class="demo-toggle active" data-type="video" onclick="switchType('video')">🎬 Video Edit</button>
+          <button class="demo-toggle" data-type="audio" onclick="switchType('audio')">🎚 Audio Edit</button>
+        </div>
+
+        <!-- VIDEO FIELDS -->
+        <div id="video-fields">
+          <div class="form-group">
+            <label class="form-label">Edit Type</label>
+            <select class="form-control" id="v-edit-type" onchange="buildAnnotation()">
+              <option value="rough_cut">Rough Cut</option>
+              <option value="fine_cut" selected>Fine Cut</option>
+              <option value="color_grade">Color Grade</option>
+              <option value="transition">Transition</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tool</label>
+            <select class="form-control" id="v-tool" onchange="buildAnnotation()">
+              <option value="Shotcut">Shotcut</option>
+              <option value="OpenShot">OpenShot</option>
+              <option value="Lightworks">Lightworks</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">In Point (s)</label>
+              <input class="form-control" type="number" id="v-in" value="83.17" step="0.01" oninput="buildAnnotation()" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Out Point (s)</label>
+              <input class="form-control" type="number" id="v-out" value="91.64" step="0.01" oninput="buildAnnotation()" />
+            </div>
+          </div>
+
+          <div id="color-fields" style="display:none;">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Saturation</label>
+                <input class="form-control" type="number" id="v-sat" value="1.15" step="0.01" min="0" max="3" oninput="buildAnnotation()" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Temp (K)</label>
+                <input class="form-control" type="number" id="v-temp" value="5200" step="100" oninput="buildAnnotation()" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Quality Rating: <span id="v-rating-label">4</span>/5</label>
+            <input type="range" class="form-range" id="v-rating" min="1" max="5" value="4" oninput="document.getElementById('v-rating-label').textContent=this.value; buildAnnotation()" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Editorial Notes</label>
+            <input class="form-control" type="text" id="v-notes" value="Clean dialogue cut, no talking over action" oninput="buildAnnotation()" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label accept-row">
+              <input type="checkbox" id="v-accepted" checked onchange="toggleRejection('v'); buildAnnotation()" />
+              Accepted into dataset
+            </label>
+          </div>
+          <div id="v-rejection-row" class="form-group" style="display:none;">
+            <label class="form-label">Rejection Reason</label>
+            <select class="form-control" id="v-rejection" onchange="buildAnnotation()">
+              <option value="motion_blur">motion_blur</option>
+              <option value="out_of_focus">out_of_focus</option>
+              <option value="jump_cut">jump_cut</option>
+              <option value="audio_desync">audio_desync</option>
+              <option value="overexposed">overexposed</option>
+              <option value="underexposed">underexposed</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- AUDIO FIELDS -->
+        <div id="audio-fields" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Track Type</label>
+            <select class="form-control" id="a-track-type" onchange="buildAnnotation()">
+              <option value="voice_podcast" selected>Voice / Podcast</option>
+              <option value="music_full_mix">Music Full Mix</option>
+              <option value="sfx">Sound FX</option>
+              <option value="voice_over">Voice Over</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tool</label>
+            <select class="form-control" id="a-tool" onchange="buildAnnotation()">
+              <option value="Ardour">Ardour</option>
+              <option value="LMMS">LMMS</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Fader (dB)</label>
+              <input class="form-control" type="number" id="a-fader" value="0.0" step="0.5" oninput="buildAnnotation()" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">LUFS</label>
+              <input class="form-control" type="number" id="a-lufs" value="-16.8" step="0.1" oninput="buildAnnotation()" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Plugin Chain</label>
+            <div class="plugin-checkboxes" id="plugin-list">
+              <label class="plugin-check"><input type="checkbox" value="LSP High Pass Filter" checked onchange="buildAnnotation()" /> High Pass Filter</label>
+              <label class="plugin-check"><input type="checkbox" value="LSP Parametric EQ" checked onchange="buildAnnotation()" /> Parametric EQ</label>
+              <label class="plugin-check"><input type="checkbox" value="LSP De-esser Mono" onchange="buildAnnotation()" /> De-esser</label>
+              <label class="plugin-check"><input type="checkbox" value="Calf Compressor" onchange="buildAnnotation()" /> Compressor</label>
+              <label class="plugin-check"><input type="checkbox" value="Calf Noise Gate" onchange="buildAnnotation()" /> Noise Gate</label>
+              <label class="plugin-check"><input type="checkbox" value="LSP Limiter Mono" onchange="buildAnnotation()" /> Limiter</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Quality Rating: <span id="a-rating-label">4</span>/5</label>
+            <input type="range" class="form-range" id="a-rating" min="1" max="5" value="4" oninput="document.getElementById('a-rating-label').textContent=this.value; buildAnnotation()" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label accept-row">
+              <input type="checkbox" id="a-accepted" checked onchange="toggleRejection('a'); buildAnnotation()" />
+              Accepted into dataset
+            </label>
+          </div>
+          <div id="a-rejection-row" class="form-group" style="display:none;">
+            <label class="form-label">Rejection Reason</label>
+            <select class="form-control" id="a-rejection" onchange="buildAnnotation()">
+              <option value="clipping">clipping</option>
+              <option value="background_noise">background_noise</option>
+              <option value="latency_offset">latency_offset</option>
+              <option value="low_signal">low_signal</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: Live JSON output -->
+      <div class="demo-output-panel">
+        <div class="output-header">
+          <span class="output-label">Generated Annotation</span>
+          <button class="copy-btn" onclick="copyAnnotation()">Copy JSON</button>
+        </div>
+        <pre class="code-block demo-code-block" id="annotation-output"></pre>
+        <div class="output-footer">
+          <span id="validation-badge" class="valid-badge">✓ Schema Valid</span>
+          <span class="output-meta" id="output-meta"></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+(function() {
+  let currentType = 'video';
+  let annotationCounter = 1;
+
+  window.switchType = function(type) {
+    currentType = type;
+    document.getElementById('video-fields').style.display = type === 'video' ? 'block' : 'none';
+    document.getElementById('audio-fields').style.display  = type === 'audio' ? 'block' : 'none';
+    document.querySelectorAll('.demo-toggle').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.type === type);
+    });
+    buildAnnotation();
+  };
+
+  window.toggleRejection = function(prefix) {
+    const accepted = document.getElementById(prefix + '-accepted').checked;
+    document.getElementById(prefix + '-rejection-row').style.display = accepted ? 'none' : 'block';
+  };
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function secondsToTimecode(s, fps = 24) {
+    s = Math.max(0, s);
+    const frames = Math.round((s % 1) * fps);
+    const secs   = Math.floor(s) % 60;
+    const mins   = Math.floor(s / 60) % 60;
+    const hrs    = Math.floor(s / 3600);
+    return `${pad(hrs)}:${pad(mins)}:${pad(secs)}:${pad(frames)}`;
+  }
+
+  function nowId(type) {
+    const d = new Date();
+    const ds = `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
+    const n  = String(annotationCounter).padStart(4, '0');
+    return `${type.toUpperCase()}-${ds}-${n}`;
+  }
+
+  function syntaxHighlight(json) {
+    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
+      let cls = 'json-number';
+      if (/^"/.test(match)) {
+        cls = /:$/.test(match) ? 'json-key' : 'json-string';
+      } else if (/true|false/.test(match)) {
+        cls = 'json-bool';
+      } else if (/null/.test(match)) {
+        cls = 'json-null';
+      }
+      return `<span class="${cls}">${match}</span>`;
+    });
+  }
+
+  window.buildAnnotation = function() {
+    let annotation;
+
+    if (currentType === 'video') {
+      const editType = document.getElementById('v-edit-type').value;
+      const tool     = document.getElementById('v-tool').value;
+      const inPt     = parseFloat(document.getElementById('v-in').value) || 0;
+      const outPt    = parseFloat(document.getElementById('v-out').value) || 0;
+      const rating   = parseInt(document.getElementById('v-rating').value);
+      const notes    = document.getElementById('v-notes').value;
+      const accepted = document.getElementById('v-accepted').checked;
+
+      // show/hide color fields
+      document.getElementById('color-fields').style.display = editType === 'color_grade' ? 'block' : 'none';
+
+      annotation = {
+        annotation_id: nowId('VID'),
+        schema_version: '1.0.0',
+        edit_type: editType,
+        tool: { name: tool, version: tool === 'Shotcut' ? '23.11.29' : tool === 'OpenShot' ? '3.1.1' : '2023.2' },
+        clip: {
+          in_point:  { seconds: inPt,  timecode: secondsToTimecode(inPt) },
+          out_point: { seconds: outPt, timecode: secondsToTimecode(outPt) },
+          duration_seconds: Math.max(0, parseFloat((outPt - inPt).toFixed(3)))
+        },
+        quality_rating: rating,
+        accepted,
+        editorial_notes: notes || undefined
+      };
+
+      if (!accepted) {
+        annotation.rejection_reason = document.getElementById('v-rejection').value;
+      }
+
+      if (editType === 'color_grade') {
+        annotation.color_grade = {
+          saturation: parseFloat(document.getElementById('v-sat').value) || 1,
+          temperature_kelvin: parseInt(document.getElementById('v-temp').value) || 5500
+        };
+      }
+
+    } else {
+      const trackType = document.getElementById('a-track-type').value;
+      const tool      = document.getElementById('a-tool').value;
+      const fader     = parseFloat(document.getElementById('a-fader').value) || 0;
+      const lufs      = parseFloat(document.getElementById('a-lufs').value) || -23;
+      const rating    = parseInt(document.getElementById('a-rating').value);
+      const accepted  = document.getElementById('a-accepted').checked;
+
+      const checked = Array.from(document.querySelectorAll('#plugin-list input:checked'));
+      const effectsChain = checked.map((el, i) => ({
+        slot: i + 1,
+        plugin_name: el.value,
+        plugin_type: el.value.toLowerCase().includes('eq') ? 'EQ'
+                   : el.value.toLowerCase().includes('compressor') ? 'compressor'
+                   : el.value.toLowerCase().includes('gate') ? 'gate'
+                   : el.value.toLowerCase().includes('limiter') ? 'limiter'
+                   : el.value.toLowerCase().includes('de-esser') ? 'de-esser'
+                   : 'filter',
+        enabled: true
+      }));
+
+      annotation = {
+        annotation_id: nowId('AUD'),
+        schema_version: '1.0.0',
+        track_type: trackType,
+        tool: { name: tool, version: tool === 'Ardour' ? '8.4.0' : '24.1.2' },
+        effects_chain: effectsChain,
+        mix_levels: { fader_db: fader, integrated_lufs: lufs },
+        quality_rating: rating,
+        accepted
+      };
+
+      if (!accepted) {
+        annotation.rejection_reason = document.getElementById('a-rejection').value;
+      }
+    }
+
+    // Remove undefined keys
+    const clean = JSON.parse(JSON.stringify(annotation));
+    const json  = JSON.stringify(clean, null, 2);
+
+    document.getElementById('annotation-output').innerHTML = syntaxHighlight(json);
+    document.getElementById('output-meta').textContent =
+      `${json.split('\n').length} lines · ${new Blob([json]).size} bytes`;
+  };
+
+  window.copyAnnotation = function() {
+    const pre = document.getElementById('annotation-output');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy JSON', 1500);
+    });
+  };
+
+  // Init
+  buildAnnotation();
+})();
+</script>
 
 <!-- ── Workflows ───────────────────────────────────────── -->
 <section id="workflows">
