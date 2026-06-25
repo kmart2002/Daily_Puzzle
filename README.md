@@ -1,113 +1,113 @@
-# Media AI Training Dataset Pipeline
+# media-ai-pipeline
 
-A professional pipeline for creating, annotating, and curating high-quality labeled datasets from video and audio editing projects — purpose-built to train AI models on real-world media production workflows.
+Structured annotation pipeline for video and audio editing sessions. Produces labeled JSON datasets from native project files (MLT, OSP, MMP, Ardour XML) for use in ML training workflows.
 
----
-
-## What Is AI Training Data for Media?
-
-AI models that generate or understand video and audio — whether for auto-editing, style transfer, noise reduction, or generative music — need to learn from labeled examples of *human editorial decisions*. That means:
-
-- **For video:** Clip selections, cut timing, transition choices, color grade parameters, pacing decisions, and why a particular take was accepted or rejected.
-- **For audio:** Instrument balance, EQ and compression settings, tempo and key metadata, mix ratios, and the editorial reasoning behind track arrangement.
-
-Raw footage and audio are not training data. **Annotated, structured, consistently formatted examples** are training data.
-
-This repository is a working implementation of a pipeline that takes raw edits from professional open-source tools and converts them into structured JSON annotations suitable for ingestion by ML training frameworks.
+Built around open-source NLEs and DAWs because their project formats are parseable — unlike proprietary formats (Premiere, Final Cut, Pro Tools) that require vendor SDKs or round-trip export hacks.
 
 ---
 
-## Repository Structure
+## Schemas
 
-```
-.
-├── schemas/
-│   ├── video-edit-annotation.json   # JSON Schema: video annotation format
-│   └── audio-edit-annotation.json   # JSON Schema: audio annotation format
-├── samples/
-│   ├── video/
-│   │   ├── README.md                # Field-by-field explanation
-│   │   ├── example-001.json         # Rough cut → clean cut (Shotcut)
-│   │   └── example-002.json         # Color grade edit (OpenShot)
-│   └── audio/
-│       ├── README.md                # Field-by-field explanation
-│       ├── example-001.json         # Music mix (LMMS)
-│       └── example-002.json         # Voice/podcast edit (Ardour)
-├── workflows/
-│   ├── shotcut-workflow.md          # AI training cuts in Shotcut
-│   ├── openshot-workflow.md         # AI training cuts in OpenShot
-│   ├── lmms-workflow.md             # AI training data from LMMS projects
-│   └── ardour-workflow.md           # AI training data from Ardour sessions
-└── web/
-    ├── index.html                   # Portfolio site
-    └── styles.css                   # Extracted CSS
-```
+Two JSON Schemas define the annotation format:
 
----
+- `schemas/video-edit-annotation.json` — covers cut edits, color grades, and transitions. Captures SMPTE timecodes, per-channel color grade values (lift/gamma/gain RGB), transition type and duration, and a controlled-vocabulary rejection reason.
+- `schemas/audio-edit-annotation.json` — covers voice, music, and SFX tracks. Captures ordered signal chains with per-plugin parameters, EBU R128 LUFS values, tempo/key/time signature metadata, and noise event positions.
 
-## Tools Used
+Both schemas use JSON Schema draft-07 with conditional `required` rules: `rejection_reason` becomes required when `accepted` is `false`.
 
-### Video Editing
-| Tool | Platform | Why It's Used |
-|------|----------|---------------|
-| [Shotcut](https://shotcut.org/) | Windows / macOS / Linux | MLT-based timeline, precise frame-level control, XML project files ideal for parsing |
-| [OpenShot](https://www.openshot.org/) | Windows / macOS / Linux | Python-based, JSON project format, scriptable for bulk annotation extraction |
-| [Lightworks](https://lwks.com/) | Windows / macOS / Linux | Professional NLE used in broadcast; EDL export for precise cut-point data |
+### Validate locally
 
-### Audio Editing
-| Tool | Platform | Why It's Used |
-|------|----------|---------------|
-| [LMMS](https://lmms.io/) | Windows / macOS / Linux | XML project files expose BPM, instrument chains, note data — highly parseable |
-| [Ardour](https://ardour.org/) | Linux / macOS | Industry-grade DAW; session XML contains full routing, plugin chains, automation |
-
----
-
-## How to Use This Repo
-
-### 1. Validate an annotation against the schema
 ```bash
-# Install a JSON Schema validator
 pip install jsonschema
 
-# Validate a video annotation
-python -c "
-import json, jsonschema
-schema = json.load(open('schemas/video-edit-annotation.json'))
-sample = json.load(open('samples/video/example-001.json'))
+python - <<'EOF'
+import json, jsonschema, pathlib
+
+schema = json.loads(pathlib.Path("schemas/video-edit-annotation.json").read_text())
+sample = json.loads(pathlib.Path("samples/video/example-001.json").read_text())
 jsonschema.validate(sample, schema)
-print('Valid.')
-"
+print("ok")
+EOF
 ```
 
-### 2. Add your own annotation
-Copy the closest example file, fill in all required fields, validate against the schema, and commit. See the per-tool workflow docs in `workflows/` for what to capture at each editing step.
+---
 
-### 3. Batch export from project files
-Each workflow doc includes notes on how to extract annotation data programmatically from the tool's native project format (MLT XML for Shotcut, JSON for OpenShot, XML for LMMS and Ardour).
+## Samples
+
+`samples/video/` and `samples/audio/` contain filled-out annotation examples. Each file validates against the corresponding schema.
+
+| File | Tool | Edit type |
+|------|------|-----------|
+| `samples/video/example-001.json` | Shotcut 23.11.29 | Fine cut — dialogue |
+| `samples/video/example-002.json` | OpenShot 3.1.1 | Color grade — warm highlights / cool shadows |
+| `samples/audio/example-001.json` | LMMS 24.1.2 | Full music mix, 120 BPM, C minor |
+| `samples/audio/example-002.json` | Ardour 8.4.0 | Podcast voice edit, 6-plugin chain, −16.8 LUFS |
 
 ---
 
-## Annotation Quality Standards
+## Workflows
 
-Every annotation in this dataset meets the following criteria:
+`workflows/` has per-tool guides covering:
 
-- **Completeness:** All required schema fields are populated.
-- **Accuracy:** Timecodes and parameters reflect the actual edit, not approximations.
-- **Rejection reasoning:** Rejected clips include a `rejection_reason` string from the controlled vocabulary.
-- **Tool traceability:** The `tool` field matches one of the approved tools and includes the exact version used.
-- **Diversity:** No two accepted annotations in the same category should share identical parameter sets. The dataset is curated to cover the full range of each parameter space.
+- Which project fields map to which annotation fields
+- What makes a training example worth keeping vs. rejecting
+- How to extract annotation data from native project files programmatically
+
+Each guide includes a Python snippet that parses the tool's project format directly.
+
+| Tool | Project format | Guide |
+|------|---------------|-------|
+| Shotcut | MLT XML (`.mlt`) | `workflows/shotcut-workflow.md` |
+| OpenShot | JSON (`.osp`) | `workflows/openshot-workflow.md` |
+| LMMS | MMP XML (`.mmp`) | `workflows/lmms-workflow.md` |
+| Ardour | Session XML (`.ardour`) | `workflows/ardour-workflow.md` |
 
 ---
 
-## Contributing
+## Adding annotations
 
-1. Follow the schema exactly — no extra fields, no missing required fields.
-2. Use the rejection vocabulary defined in each schema's `rejection_reason` enum.
-3. Include a `source_file` reference (can be anonymized as `project-YYYYMMDD-NNN`).
-4. Run schema validation before committing.
+1. Copy the closest example from `samples/`
+2. Change `annotation_id` — format is `VID-YYYYMMDD-NNNN` or `AUD-YYYYMMDD-NNNN`
+3. Fill in all required fields (see schema for which are required vs optional)
+4. If `accepted` is `false`, populate `rejection_reason` with a value from the schema enum
+5. Validate before committing (see above)
+
+For bulk extraction from project files, see the relevant workflow doc — all four tools have a Python extractor included.
+
+---
+
+## Rejection vocabulary
+
+Annotations are only useful as negative examples if the rejection reason is consistent. Use the controlled vocabulary defined in each schema — don't freetext it.
+
+**Video:** `motion_blur` · `out_of_focus` · `jump_cut` · `audio_desync` · `overexposed` · `underexposed` · `performance` · `framing`
+
+**Audio:** `clipping` · `background_noise` · `latency_offset` · `low_signal` · `phase_issues` · `wrong_key` · `timing_drift`
+
+---
+
+## Tool coverage
+
+| Tool | Category | Project format |
+|------|----------|---------------|
+| Shotcut | Video NLE | MLT XML |
+| OpenShot | Video NLE | JSON |
+| Lightworks | Video NLE | EDL |
+| LMMS | DAW | MMP XML |
+| Ardour | DAW | Session XML |
+
+Lightworks annotation is supported at the schema level but the extractor script is not yet written — EDL parsing is straightforward, PRs welcome.
+
+---
+
+## Known limitations
+
+- Color grade annotations capture three-way corrector values only (lift/gamma/gain). Node-based grading graphs (e.g., OpenShot's upcoming OpenColorIO integration) are not yet modeled.
+- LMMS beat+bassline patterns are extracted at the pattern level, not individual beat steps. This loses granularity for rhythm-focused training tasks.
+- Ardour automation lanes are not captured — only static plugin parameters at session close.
 
 ---
 
 ## License
 
-Annotations and schemas: MIT. Source media files (not included in this repo) remain under their original licenses.
+MIT. Source media files referenced by annotations are not included in this repo and remain under their original licenses.
