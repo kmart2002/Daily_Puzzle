@@ -110,10 +110,10 @@ main {
 }
 
 .board-wrap {
-  background: radial-gradient(circle at 50% 40%, #2e7fb0 0%, #1d5c88 55%, #164a70 100%);
-  border-radius: 16px;
-  padding: 10px;
-  box-shadow: 0 12px 30px #00000055;
+  background: linear-gradient(160deg, #123b57 0%, #0d2c42 100%);
+  border-radius: 18px;
+  padding: 8px;
+  box-shadow: 0 16px 40px #00000066, inset 0 0 0 1px #ffffff12;
 }
 
 .board {
@@ -121,6 +121,25 @@ main {
   height: auto;
   display: block;
   user-select: none;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.last-placed-ring {
+  animation: spin 9s linear infinite;
+  transform-origin: center;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .last-placed-ring {
+    animation: none;
+  }
 }
 
 .board-hint {

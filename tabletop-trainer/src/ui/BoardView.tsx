@@ -3,7 +3,7 @@ import { describeVertex } from '../engine/catan/evaluate';
 import { Board, PIPS, Placement, Road, TileType, VertexKey } from '../engine/catan/types';
 
 const SIZE = 46;
-const PAD = 78;
+const PAD = 82;
 
 const TILE_COLORS: Record<TileType, string> = {
   brick: '#c1613c',
@@ -22,6 +22,22 @@ const TILE_LABELS: Record<TileType, string> = {
   wool: '🐑',
   desert: '🏜️',
 };
+
+const TILE_TYPES: TileType[] = ['brick', 'lumber', 'ore', 'grain', 'wool', 'desert'];
+
+/** Lighten (pct > 0) or darken (pct < 0) a hex color for gradient stops. */
+function shade(hex: string, pct: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  let r = (n >> 16) & 0xff;
+  let g = (n >> 8) & 0xff;
+  let b = n & 0xff;
+  const t = pct < 0 ? 0 : 255;
+  const p = Math.abs(pct);
+  r = Math.round((t - r) * p) + r;
+  g = Math.round((t - g) * p) + g;
+  b = Math.round((t - b) * p) + b;
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
 
 export interface Overlay {
   vertex: VertexKey;
@@ -63,6 +79,25 @@ const OVERLAY_COLORS: Record<Overlay['tone'], string> = {
   best: '#16a34a',
 };
 
+/** A small pitched-roof house, centered on the origin. */
+function Settlement({ color }: { color: string }) {
+  return (
+    <g filter="url(#pieceShadow)">
+      <path
+        d="M -8 8 L -8 -2 L 0 -9.5 L 8 -2 L 8 8 Z"
+        fill={color}
+        stroke={shade(color, -0.45)}
+        strokeWidth={1.6}
+        strokeLinejoin="round"
+      />
+      {/* roof highlight */}
+      <path d="M -8 -2 L 0 -9.5 L 8 -2 Z" fill={shade(color, 0.28)} opacity={0.85} />
+      {/* wall shading */}
+      <path d="M 8 -2 L 8 8 L 2 8 L 2 -2 Z" fill={shade(color, -0.22)} opacity={0.55} />
+    </g>
+  );
+}
+
 export function BoardView({
   board, placements, roads, legal, onVertexClick, legalEdges, onEdgeClick,
   seatColors, overlays = [], edgeOverlays = [], lastPlaced,
@@ -84,6 +119,38 @@ export function BoardView({
       role="img"
       aria-label="Catan board"
     >
+      <defs>
+        {/* Per-tile vertical gradient: lit from top, shaded at the bottom edge. */}
+        {TILE_TYPES.map((t) => (
+          <linearGradient key={t} id={`tile-${t}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={shade(TILE_COLORS[t], 0.16)} />
+            <stop offset="55%" stopColor={TILE_COLORS[t]} />
+            <stop offset="100%" stopColor={shade(TILE_COLORS[t], -0.14)} />
+          </linearGradient>
+        ))}
+        <radialGradient id="token-face" cx="42%" cy="38%" r="72%">
+          <stop offset="0%" stopColor="#fffdf6" />
+          <stop offset="100%" stopColor="#ecd9a8" />
+        </radialGradient>
+        <radialGradient id="water" cx="50%" cy="42%" r="75%">
+          <stop offset="0%" stopColor="#2f86ba" />
+          <stop offset="60%" stopColor="#1f6394" />
+          <stop offset="100%" stopColor="#164a70" />
+        </radialGradient>
+        <filter id="tileShadow" x="-20%" y="-20%" width="140%" height="145%">
+          <feDropShadow dx="0" dy="2.5" stdDeviation="2.4" floodColor="#06253a" floodOpacity="0.45" />
+        </filter>
+        <filter id="pieceShadow" x="-40%" y="-40%" width="180%" height="185%">
+          <feDropShadow dx="0" dy="1.6" stdDeviation="1.4" floodColor="#0b1220" floodOpacity="0.55" />
+        </filter>
+        <filter id="tokenShadow" x="-40%" y="-40%" width="180%" height="185%">
+          <feDropShadow dx="0" dy="1.2" stdDeviation="1.3" floodColor="#3a2c10" floodOpacity="0.4" />
+        </filter>
+      </defs>
+
+      {/* Water backdrop */}
+      <rect x={minX} y={minY} width={width} height={height} fill="url(#water)" />
+
       {/* Tiles */}
       {board.hexes.map((hex) => {
         const corners = hexCorners(hex.q, hex.r).map((c) => vertexPos(c, SIZE));
@@ -94,30 +161,54 @@ export function BoardView({
         const red = token === 6 || token === 8;
         return (
           <g key={`${hex.q},${hex.r}`}>
-            <polygon points={points} fill={TILE_COLORS[hex.tile]} stroke="#f7efd8" strokeWidth={3} />
-            <text x={cx} y={cy - 22} textAnchor="middle" fontSize={13}>
+            <polygon
+              points={points}
+              fill={`url(#tile-${hex.tile})`}
+              stroke={shade(TILE_COLORS[hex.tile], -0.3)}
+              strokeWidth={1.5}
+              strokeLinejoin="round"
+              filter="url(#tileShadow)"
+            />
+            {/* inner rim for a subtle bevel */}
+            <polygon
+              points={points}
+              fill="none"
+              stroke="#ffffff"
+              strokeOpacity={0.22}
+              strokeWidth={1.2}
+              transform={`translate(${cx} ${cy}) scale(0.9) translate(${-cx} ${-cy})`}
+            />
+            <text
+              x={cx}
+              y={cy - 21}
+              textAnchor="middle"
+              fontSize={15}
+              style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.35))' }}
+            >
               {TILE_LABELS[hex.tile]}
             </text>
             {token !== null && (
-              <g>
-                <circle cx={cx} cy={cy + 4} r={15.5} fill="#faf3df" stroke="#00000030" />
+              <g filter="url(#tokenShadow)">
+                <circle cx={cx} cy={cy + 5} r={16} fill="url(#token-face)" stroke="#b79a5c" strokeWidth={0.8} />
+                <circle cx={cx} cy={cy + 5} r={16} fill="none" stroke="#ffffff" strokeOpacity={0.5} strokeWidth={0.8} transform={`translate(0 -0.6)`} />
                 <text
                   x={cx}
-                  y={cy + 9}
+                  y={cy + 8}
                   textAnchor="middle"
-                  fontSize={red ? 16 : 14}
-                  fontWeight={700}
+                  fontSize={red ? 17 : 15}
+                  fontWeight={800}
                   fill={red ? '#c0392b' : '#33302a'}
+                  fontFamily="'Georgia', serif"
                 >
                   {token}
                 </text>
-                <g fill={red ? '#c0392b' : '#33302a'}>
+                <g fill={red ? '#c0392b' : '#4a4535'}>
                   {Array.from({ length: PIPS[token] }, (_, i) => (
                     <circle
                       key={i}
                       cx={cx + (i - (PIPS[token] - 1) / 2) * 4}
-                      cy={cy + 14.5}
-                      r={1.3}
+                      cy={cy + 15.5}
+                      r={1.4}
                     />
                   ))}
                 </g>
@@ -134,15 +225,15 @@ export function BoardView({
         const mx = (a.x + b.x) / 2;
         const my = (a.y + b.y) / 2;
         const len = Math.hypot(mx, my) || 1;
-        const ox = mx + (mx / len) * 34;
-        const oy = my + (my / len) * 34;
+        const ox = mx + (mx / len) * 36;
+        const oy = my + (my / len) * 36;
         const label = port.kind === 'any' ? '3:1' : `2:1${TILE_LABELS[port.kind]}`;
         return (
           <g key={i} className="port">
-            <line x1={a.x} y1={a.y} x2={ox} y2={oy} stroke="#7a5b3a" strokeWidth={2} strokeDasharray="3 3" />
-            <line x1={b.x} y1={b.y} x2={ox} y2={oy} stroke="#7a5b3a" strokeWidth={2} strokeDasharray="3 3" />
-            <circle cx={ox} cy={oy} r={14} fill="#f7efd8" stroke="#7a5b3a" strokeWidth={1.5} />
-            <text x={ox} y={oy + 4} textAnchor="middle" fontSize={port.kind === 'any' ? 11 : 9} fontWeight={700} fill="#5b4426">
+            <line x1={a.x} y1={a.y} x2={ox} y2={oy} stroke="#8a6a42" strokeWidth={2.4} strokeLinecap="round" />
+            <line x1={b.x} y1={b.y} x2={ox} y2={oy} stroke="#8a6a42" strokeWidth={2.4} strokeLinecap="round" />
+            <circle cx={ox} cy={oy} r={14.5} fill="#f4ead0" stroke="#8a6a42" strokeWidth={1.6} filter="url(#tokenShadow)" />
+            <text x={ox} y={oy + 4} textAnchor="middle" fontSize={port.kind === 'any' ? 11 : 9} fontWeight={800} fill="#5b4426">
               {label}
             </text>
           </g>
@@ -153,10 +244,12 @@ export function BoardView({
       {roads.map((road) => {
         const [ka, kb] = edgeEndpoints(road.edge);
         const seg = trimmed(positions.get(ka)!, positions.get(kb)!);
+        const color = seatColors[road.player];
         return (
-          <g key={`r-${road.edge}`}>
-            <line {...seg} stroke="#1f2937" strokeWidth={9} strokeLinecap="round" />
-            <line {...seg} stroke={seatColors[road.player]} strokeWidth={5.5} strokeLinecap="round" />
+          <g key={`r-${road.edge}`} filter="url(#pieceShadow)">
+            <line {...seg} stroke={shade(color, -0.5)} strokeWidth={9.5} strokeLinecap="round" />
+            <line {...seg} stroke={color} strokeWidth={6} strokeLinecap="round" />
+            <line {...seg} stroke={shade(color, 0.4)} strokeWidth={1.8} strokeLinecap="round" opacity={0.7} />
           </g>
         );
       })}
@@ -250,13 +343,10 @@ export function BoardView({
         const isLast = pl.vertex === lastPlaced;
         return (
           <g key={`s-${pl.vertex}`} transform={`translate(${p.x}, ${p.y})`}>
-            {isLast && <circle r={13.5} fill="none" stroke="#111827" strokeWidth={1.5} strokeDasharray="3 2" />}
-            <path
-              d="M -7.5 7 L -7.5 -1.5 L 0 -8.5 L 7.5 -1.5 L 7.5 7 Z"
-              fill={color}
-              stroke="#1f2937"
-              strokeWidth={1.6}
-            />
+            {isLast && (
+              <circle r={14.5} fill="none" stroke="#fef3c7" strokeWidth={2} strokeDasharray="3 2.5" className="last-placed-ring" />
+            )}
+            <Settlement color={color} />
           </g>
         );
       })}
