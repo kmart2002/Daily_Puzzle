@@ -41,6 +41,8 @@ interface BoardViewProps {
   onEdgeClick: (edge: EdgeKey) => void;
   seatColors: string[];
   overlays?: Overlay[];
+  /** Highlighted road directions (e.g. the best road for a graded step). */
+  edgeOverlays?: { edge: EdgeKey; tone: Overlay['tone'] }[];
   lastPlaced?: VertexKey | null;
 }
 
@@ -63,7 +65,7 @@ const OVERLAY_COLORS: Record<Overlay['tone'], string> = {
 
 export function BoardView({
   board, placements, roads, legal, onVertexClick, legalEdges, onEdgeClick,
-  seatColors, overlays = [], lastPlaced,
+  seatColors, overlays = [], edgeOverlays = [], lastPlaced,
 }: BoardViewProps) {
   const positions = new Map(
     board.vertexKeys.map((k) => [k, vertexPos(parseVertexKey(k), SIZE)]),
@@ -185,6 +187,23 @@ export function BoardView({
               strokeDasharray="7 5"
             />
           </g>
+        );
+      })}
+
+      {/* Edge overlays (recommended road directions) */}
+      {edgeOverlays.map((o) => {
+        const [ka, kb] = edgeEndpoints(o.edge);
+        const seg = trimmed(positions.get(ka)!, positions.get(kb)!, 0.12);
+        return (
+          <line
+            key={`eo-${o.edge}`}
+            {...seg}
+            stroke={OVERLAY_COLORS[o.tone]}
+            strokeWidth={5}
+            strokeLinecap="round"
+            strokeDasharray="8 5"
+            pointerEvents="none"
+          />
         );
       })}
 

@@ -48,6 +48,36 @@ header h1 {
 nav {
   display: flex;
   gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.daily-set {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  background: #17415f;
+  border: 1px solid #2b6a99;
+  border-radius: 8px;
+  padding: 3px 8px 3px 10px;
+}
+
+.daily-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #b9d2e4;
+  margin-right: 2px;
+}
+
+.daily-pick {
+  padding: 3px 9px;
+  border: 1px solid transparent;
+  background: transparent;
+}
+
+.daily-pick.active {
+  background: #2563eb;
+  border-color: #7fb3e8;
 }
 
 button {
@@ -284,4 +314,9 @@ main {
   margin-top: 8px;
   font-size: 12.5px;
   color: #166534;
+}
+
+.focus-btn {
+  margin: 0 0 12px;
+  width: 100%;
 }

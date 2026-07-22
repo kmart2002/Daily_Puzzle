@@ -23,7 +23,8 @@ opponents have already placed.
 | Opponent agents | Deterministic personalities: **greedy** (raw pips), **balanced** (score-max), **blocker** (denies your best spots); all aim their setup roads at the best open expansion spot |
 | Coaching agent | Ranks all legal vertices with an explainable score breakdown; grades your settlement **and** your road (S–D), explains the gap vs. best in plain language; hint mode for both |
 | Interactive board | SVG hex board: click legal vertices and road edges, see tokens/pips/ports, player-colored settlements and roads, hint & best-move overlays |
-| Modes | Daily (date seed) + practice (random seed) + retry same board |
+| Modes | Daily set of **5 puzzles** (date-seeded, same for everyone) + practice (random seed) + retry same board + `?seed=` deep links |
+| Daily email | GitHub Action emails the day's 5 puzzle links each morning (see `.github/workflows/daily-puzzle-email.yml`; SMTP creds live in repo secrets, never in code) |
 
 Everything runs client-side — no backend, no secrets, deployable as static files.
 

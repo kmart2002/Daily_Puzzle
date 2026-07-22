@@ -20,6 +20,10 @@ export interface CoachReport {
   details: string[];
   /** Top alternatives (excluding the chosen spot). */
   alternatives: ScoreBreakdown[];
+  /** The top-3 spots at decision time, in rank order — includes the chosen
+   *  spot when it made the cut, so the UI can show "the podium" regardless
+   *  of what the player picked. */
+  topPicks: ScoreBreakdown[];
 }
 
 function gradeFor(rank: number, gap: number): Grade {
@@ -137,6 +141,7 @@ export function coachPlacement(
     headline: HEADLINES[grade],
     details,
     alternatives: ranked.filter((s) => s.vertex !== chosenVertex).slice(0, 3),
+    topPicks: ranked.slice(0, 3),
   };
 }
 
@@ -150,6 +155,8 @@ export interface RoadReport {
   grade: Grade;
   headline: string;
   details: string[];
+  /** All road directions at decision time, in rank order (max 3). */
+  topPicks: RoadCandidate[];
 }
 
 function roadGrade(rank: number, gap: number): Grade {
@@ -209,7 +216,7 @@ export function coachRoad(
 
   return {
     step, player, chosen, best, rank, outOf: candidates.length, grade,
-    headline: ROAD_HEADLINES[grade], details,
+    headline: ROAD_HEADLINES[grade], details, topPicks: candidates,
   };
 }
 

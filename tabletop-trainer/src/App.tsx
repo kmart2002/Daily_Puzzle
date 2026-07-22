@@ -8,16 +8,31 @@ import { VertexKey } from './engine/catan/types';
 import { BoardView, Overlay } from './ui/BoardView';
 import { CoachPanel } from './ui/CoachPanel';
 
-/** Same board for everyone each day, like a daily crossword. */
-function dailySeed(): string {
+export const DAILY_SET_SIZE = 5;
+
+function todayStamp(): string {
   const now = new Date();
   const m = String(now.getMonth() + 1).padStart(2, '0');
   const d = String(now.getDate()).padStart(2, '0');
-  return `daily-${now.getFullYear()}-${m}-${d}`;
+  return `${now.getFullYear()}-${m}-${d}`;
+}
+
+/**
+ * The day's practice set: five seeded puzzles, same for everyone, like a daily
+ * crossword page. Puzzle 1 is "the" daily; 2-5 round out a short session.
+ */
+export function dailySeeds(stamp = todayStamp()): string[] {
+  return Array.from({ length: DAILY_SET_SIZE }, (_, i) => `daily-${stamp}-${i + 1}`);
 }
 
 function randomSeed(): string {
   return `practice-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/** Deep links (e.g. from the daily email): ?seed=daily-2026-07-22-3 */
+function seedFromUrl(): string | null {
+  const seed = new URLSearchParams(window.location.search).get('seed');
+  return seed && /^[\w-]{1,64}$/.test(seed) ? seed : null;
 }
 
 /** Seat colors by index; the user (seat 2) is blue. */
@@ -26,18 +41,19 @@ const SEAT_COLORS = ['#dc2626', '#ea580c', '#2563eb', '#f5f5f4'];
 const HINT_TONES: Overlay['tone'][] = ['gold', 'silver', 'bronze'];
 
 export default function App() {
-  const [seed, setSeed] = useState(dailySeed);
-  const [session, setSession] = useState(() => createSession(dailySeed()));
+  const [seed, setSeed] = useState(() => seedFromUrl() ?? dailySeeds()[0]);
+  const [session, setSession] = useState(() => createSession(seedFromUrl() ?? dailySeeds()[0]));
   const [hintsShown, setHintsShown] = useState(false);
-  const [showBest, setShowBest] = useState(false);
+  const [focusStep, setFocusStep] = useState<number | null>(null);
 
-  const isDaily = seed === dailySeed();
+  const todaysSeeds = dailySeeds();
+  const dailyIndex = todaysSeeds.indexOf(seed); // -1 when on a practice board
 
   function startPuzzle(newSeed: string) {
     setSeed(newSeed);
     setSession(createSession(newSeed));
     setHintsShown(false);
-    setShowBest(false);
+    setFocusStep(null);
   }
 
   function handlePlace(vertex: VertexKey) {
@@ -85,6 +101,7 @@ export default function App() {
   );
 
   const overlays: Overlay[] = [];
+  const edgeOverlays: { edge: EdgeKey; tone: Overlay['tone'] }[] = [];
   if (hintsShown) {
     currentHints.forEach((h, i) => {
       overlays.push({ vertex: h.spot.vertex, label: `#${i + 1}`, tone: HINT_TONES[i] });
@@ -93,10 +110,26 @@ export default function App() {
       if (c.target) overlays.push({ vertex: c.target, label: `#${i + 1}`, tone: HINT_TONES[i] });
     });
   }
-  if (showBest && session.phase === 'done') {
-    for (const report of session.reports) {
-      if (report.rank !== 1) {
-        overlays.push({ vertex: report.best.vertex, label: `best #${report.step}`, tone: 'best' });
+  // Spotlight a graded turn: the full podium at decision time — top-3
+  // settlement spots (the player's own pick marked ✓) and the best road.
+  if (focusStep !== null) {
+    const report = session.reports[focusStep - 1];
+    const roadReport = session.roadReports[focusStep - 1];
+    report?.topPicks.forEach((s, i) => {
+      const yours = s.vertex === report.chosen.vertex;
+      overlays.push({
+        vertex: s.vertex,
+        label: yours ? `#${i + 1} ✓ you` : `#${i + 1}`,
+        tone: HINT_TONES[i],
+      });
+    });
+    if (report && report.rank > 3) {
+      overlays.push({ vertex: report.chosen.vertex, label: `you · #${report.rank}`, tone: 'best' });
+    }
+    if (roadReport) {
+      edgeOverlays.push({ edge: roadReport.best.edge, tone: 'best' });
+      if (roadReport.best.target) {
+        overlays.push({ vertex: roadReport.best.target, label: 'road target', tone: 'best' });
       }
     }
   }
@@ -123,11 +156,25 @@ export default function App() {
           <h1>Tabletop Trainer</h1>
           <p className="subtitle">
             Daily Catan puzzle — pick the best starting settlements.{' '}
-            <span className="seed-tag">{isDaily ? `Daily · ${seed}` : `Practice · ${seed}`}</span>
+            <span className="seed-tag">
+              {dailyIndex >= 0 ? `Daily ${dailyIndex + 1} of ${DAILY_SET_SIZE} · ${seed}` : `Practice · ${seed}`}
+            </span>
           </p>
         </div>
         <nav>
-          <button onClick={() => startPuzzle(dailySeed())}>Today&rsquo;s puzzle</button>
+          <div className="daily-set" role="group" aria-label="Today's five puzzles">
+            <span className="daily-label">Today:</span>
+            {todaysSeeds.map((s, i) => (
+              <button
+                key={s}
+                className={`daily-pick${s === seed ? ' active' : ''}`}
+                onClick={() => startPuzzle(s)}
+                aria-label={`Daily puzzle ${i + 1}`}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
           <button onClick={() => startPuzzle(seed)}>Retry board</button>
           <button onClick={() => startPuzzle(randomSeed())}>Practice board</button>
         </nav>
@@ -145,6 +192,7 @@ export default function App() {
             onEdgeClick={handleRoad}
             seatColors={SEAT_COLORS}
             overlays={overlays}
+            edgeOverlays={edgeOverlays}
             lastPlaced={lastPlaced}
           />
           <p className="board-hint">
@@ -162,8 +210,8 @@ export default function App() {
           hintsShown={hintsShown}
           onToggleHints={() => setHintsShown((v) => !v)}
           hintLines={hintLines}
-          showBest={showBest}
-          onToggleBest={() => setShowBest((v) => !v)}
+          focusStep={focusStep}
+          onFocusStep={setFocusStep}
         />
       </main>
     </div>

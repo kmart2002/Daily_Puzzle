@@ -17,9 +17,19 @@ npm test         # 28 engine tests (topology, rules, scoring, determinism)
 npm run build    # strict typecheck + static production build
 ```
 
-The app is fully client-side and deterministic: the date seeds the daily board,
-so everyone gets the same puzzle, and a seed fully determines opponent play.
-No backend, no keys, no third-party runtime deps beyond React.
+The app is fully client-side and deterministic: the date seeds a **daily set of
+five puzzles**, so everyone gets the same boards, and a seed fully determines
+opponent play. `?seed=<name>` deep-links a specific puzzle (the daily email uses
+this). No backend, no keys, no third-party runtime deps beyond React.
+
+### Daily email + hosting
+
+- `.github/workflows/deploy-pages.yml` publishes the app to GitHub Pages at
+  `/tabletop-trainer/` (Settings → Pages → Source: GitHub Actions).
+- `.github/workflows/daily-puzzle-email.yml` emails the day's five puzzle links
+  every morning. Setup: add `MAIL_USERNAME` + `MAIL_PASSWORD` (Gmail app
+  password) as Actions secrets; optionally set `PUZZLE_EMAIL_TO` /
+  `PUZZLE_APP_URL` variables. Trigger it manually from the Actions tab to test.
 
 ## How to play
 

@@ -17,8 +17,9 @@ interface CoachPanelProps {
   hintsShown: boolean;
   onToggleHints: () => void;
   hintLines: string[];
-  showBest: boolean;
-  onToggleBest: () => void;
+  /** Which graded step (1-based) is currently spotlighted on the board. */
+  focusStep: number | null;
+  onFocusStep: (step: number | null) => void;
 }
 
 function GradeBadge({ grade }: { grade: Grade }) {
@@ -82,7 +83,7 @@ function ReportCard({ report, board }: { report: CoachReport; board: PuzzleSessi
 }
 
 export function CoachPanel({
-  session, seatColors, hintsShown, onToggleHints, hintLines, showBest, onToggleBest,
+  session, seatColors, hintsShown, onToggleHints, hintLines, focusStep, onFocusStep,
 }: CoachPanelProps) {
   const { board, seats, log, reports, roadReports, phase } = session;
   const step = phase === 'user-road' ? reports.length : reports.length + 1;
@@ -151,13 +152,16 @@ export function CoachPanel({
             <div key={r.step}>
               <ReportCard report={r} board={board} />
               {roadReports[i] && <RoadReportCard report={roadReports[i]} board={board} />}
+              <button
+                className="focus-btn"
+                onClick={() => onFocusStep(focusStep === r.step ? null : r.step)}
+              >
+                {focusStep === r.step
+                  ? 'Hide top spots'
+                  : `Show top spots for turn #${r.step} on board`}
+              </button>
             </div>
           ))}
-          {phase === 'done' && (
-            <button onClick={onToggleBest}>
-              {showBest ? 'Hide best spots' : 'Show best spots on board'}
-            </button>
-          )}
         </section>
       )}
     </aside>

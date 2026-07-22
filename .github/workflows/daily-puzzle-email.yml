@@ -1,0 +1,46 @@
+# Emails the day's five puzzle links every morning.
+#
+# One-time setup (repo Settings → Secrets and variables → Actions):
+#   Secrets:
+#     MAIL_USERNAME — the Gmail address that SENDS the mail
+#     MAIL_PASSWORD — a Gmail App Password for that address
+#                     (Google Account → Security → 2-Step Verification → App passwords)
+#   Variables (optional):
+#     PUZZLE_EMAIL_TO — recipient list (defaults to martyskahn@gmail.com)
+#     PUZZLE_APP_URL  — where the app is hosted (defaults to this repo's GitHub Pages)
+#
+# Test it: Actions tab → "Daily puzzle email" → Run workflow.
+name: Daily puzzle email
+
+on:
+  schedule:
+    - cron: '0 13 * * *' # 13:00 UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate today's puzzle email
+        id: gen
+        run: node tabletop-trainer/scripts/daily-email.mjs >> "$GITHUB_OUTPUT"
+        env:
+          APP_URL: ${{ vars.PUZZLE_APP_URL }}
+
+      - name: Send email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: ${{ steps.gen.outputs.subject }}
+          to: ${{ vars.PUZZLE_EMAIL_TO || 'martyskahn@gmail.com' }}
+          from: Tabletop Trainer <${{ secrets.MAIL_USERNAME }}>
+          html_body: file://email.html
