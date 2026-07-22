@@ -1,6 +1,7 @@
+import { EdgeKey } from './board';
 import { Rng } from '../rng';
-import { rankVertices, ScoreBreakdown } from './evaluate';
-import { Board, Placement, VertexKey } from './types';
+import { rankVertices, roadCandidates, ScoreBreakdown } from './evaluate';
+import { Board, Placement, Road, VertexKey } from './types';
 
 export type Personality = 'greedy' | 'balanced' | 'blocker';
 
@@ -71,6 +72,26 @@ export function chooseOpponentMove(
 
   scored.sort((a, b) => b.value - a.value || a.vertex.localeCompare(b.vertex));
   return scored[0].vertex;
+}
+
+/**
+ * Pick the setup road for the settlement an opponent just placed: the edge
+ * pointing at the most valuable still-open expansion spot. All personalities
+ * share this; road style differences are a phase-2 refinement.
+ */
+export function chooseOpponentRoad(
+  board: Board,
+  placements: Placement[],
+  roads: Road[],
+  player: number,
+  settlementVertex: VertexKey,
+  rnd: Rng,
+): EdgeKey {
+  const candidates = roadCandidates(board, placements, roads, player, settlementVertex);
+  if (candidates.length === 0) throw new Error('no legal setup road');
+  const scored = candidates.map((c) => ({ edge: c.edge, value: c.value + rnd() * 0.001 }));
+  scored.sort((a, b) => b.value - a.value || a.edge.localeCompare(b.edge));
+  return scored[0].edge;
 }
 
 /** Exposed for tests/UI: what the opponent was choosing between. */

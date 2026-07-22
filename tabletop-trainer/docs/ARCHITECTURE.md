@@ -47,15 +47,18 @@ sequenceDiagram
 
     Note over S: seed = today's date → board generated
     S->>O: seats 1–2 place (snake draft)
-    O-->>S: settlements placed
-    U->>S: click a vertex (step 1)
+    O-->>S: settlements + attached roads placed
+    U->>S: click a vertex (step 1 settlement)
     S->>C: grade placement vs. all legal alternatives
     C-->>U: grade S–D + why + best alternative
+    U->>S: click an edge (step 1 road — official setup rule)
+    S->>C: grade road direction vs. other directions
+    C-->>U: road grade + where it should have pointed
     S->>O: seat 4 places twice (snake turn)
-    O-->>S: settlements placed
-    U->>S: click a vertex (step 2)
+    O-->>S: settlements + roads placed
+    U->>S: settlement + road (step 2)
     S->>C: grade (now weighs synergy with your 1st pick)
-    C-->>U: grade + final report
+    C-->>U: grades + final report
     S->>O: seats 2–1 finish the draft
     Note over U,C: summary — grades, best-spot overlay, retry / new puzzle
 ```

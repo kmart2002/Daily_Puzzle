@@ -116,6 +116,31 @@ main {
   stroke: #ffffff;
 }
 
+.legal-edge {
+  cursor: pointer;
+  outline: none;
+}
+
+.legal-edge .legal-edge-line {
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.legal-edge:hover .legal-edge-line,
+.legal-edge:focus .legal-edge-line {
+  animation: none;
+  stroke: #ffffff;
+}
+
+.road-note {
+  color: #8a8168;
+  font-size: 12px;
+}
+
+.road-report {
+  margin-top: -4px;
+  background: #fbfaf4;
+}
+
 @keyframes pulse {
   0%, 100% {
     opacity: 0.55;

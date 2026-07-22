@@ -119,6 +119,31 @@ export function coastRing(): VertexKey[] {
   return ring;
 }
 
+// --- Edges (roads) ---
+
+/** Canonical edge id: the two endpoint vertex keys, sorted, joined by "|". */
+export type EdgeKey = string;
+
+export function edgeKey(a: VertexKey, b: VertexKey): EdgeKey {
+  return a < b ? `${a}|${b}` : `${b}|${a}`;
+}
+
+export function edgeEndpoints(edge: EdgeKey): [VertexKey, VertexKey] {
+  const [a, b] = edge.split('|');
+  return [a, b];
+}
+
+/** Edges from a vertex to its on-board neighbors. */
+export function vertexEdges(v: VertexId): EdgeKey[] {
+  const boardSet = new Set(boardVertexKeys());
+  const key = vertexKey(v);
+  if (!boardSet.has(key)) return [];
+  return vertexNeighbors(v)
+    .map(vertexKey)
+    .filter((n) => boardSet.has(n))
+    .map((n) => edgeKey(key, n));
+}
+
 // --- Geometry (shared by engine and UI so they can never disagree) ---
 
 export function hexCenter(q: number, r: number, size: number): { x: number; y: number } {

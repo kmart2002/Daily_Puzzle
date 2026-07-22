@@ -1,9 +1,12 @@
 import { rngFromSeed } from '../rng';
-import { coachPlacement, CoachReport } from './coach';
+import { EdgeKey } from './board';
+import { coachPlacement, CoachReport, coachRoad, RoadReport } from './coach';
 import { generateBoard } from './generator';
-import { chooseOpponentMove, OPPONENT_PROFILES, Personality } from './opponents';
-import { isLegal } from './rules';
-import { Board, Placement, VertexKey } from './types';
+import {
+  chooseOpponentMove, chooseOpponentRoad, OPPONENT_PROFILES, Personality,
+} from './opponents';
+import { isLegal, legalSetupRoads } from './rules';
+import { Board, Placement, Road, VertexKey } from './types';
 
 export const NUM_PLAYERS = 4;
 
@@ -17,6 +20,7 @@ export interface Seat {
 export interface MoveRecord {
   player: number;
   vertex: VertexKey;
+  road: EdgeKey;
   auto: boolean;
 }
 
@@ -27,13 +31,19 @@ export interface PuzzleSession {
   seats: Seat[];
   /** Snake draft: seat indices in placement order, e.g. 0,1,2,3,3,2,1,0. */
   order: number[];
-  /** Index into `order` of the next placement. */
+  /** Index into `order` of the current draft turn. */
   turn: number;
   placements: Placement[];
+  roads: Road[];
+  /** Completed turns (settlement + road pairs). */
   log: MoveRecord[];
-  /** Coach feedback for each of the user's placements, in step order. */
+  /** The user's settlement awaiting its road (phase 'user-road'). */
+  pendingSettlement: VertexKey | null;
+  /** Coach feedback for each of the user's settlements, in step order. */
   reports: CoachReport[];
-  phase: 'user-turn' | 'done';
+  /** Coach feedback for each of the user's setup roads, in step order. */
+  roadReports: RoadReport[];
+  phase: 'user-settlement' | 'user-road' | 'done';
 }
 
 export function snakeOrder(players = NUM_PLAYERS): number[] {
@@ -53,13 +63,18 @@ function makeSeats(userSeat: number): Seat[] {
   });
 }
 
-/** Play opponent turns until it's the user's turn or the draft is complete. */
+/** Play opponent turns (settlement + road) until the user is up or the draft ends. */
 function runAuto(session: PuzzleSession): PuzzleSession {
-  const s = { ...session, placements: [...session.placements], log: [...session.log] };
+  const s = {
+    ...session,
+    placements: [...session.placements],
+    roads: [...session.roads],
+    log: [...session.log],
+  };
   while (s.turn < s.order.length) {
     const seatIdx = s.order[s.turn];
     if (seatIdx === s.userSeat) {
-      s.phase = 'user-turn';
+      s.phase = 'user-settlement';
       return s;
     }
     const seat = s.seats[seatIdx];
@@ -68,7 +83,9 @@ function runAuto(session: PuzzleSession): PuzzleSession {
       s.board, s.placements, seatIdx, seat.personality as Personality, rnd, s.userSeat,
     );
     s.placements.push({ player: seatIdx, vertex });
-    s.log.push({ player: seatIdx, vertex, auto: true });
+    const road = chooseOpponentRoad(s.board, s.placements, s.roads, seatIdx, vertex, rnd);
+    s.roads.push({ player: seatIdx, edge: road });
+    s.log.push({ player: seatIdx, vertex, road, auto: true });
     s.turn++;
   }
   s.phase = 'done';
@@ -89,29 +106,57 @@ export function createSession(seed: string, userSeat = 2): PuzzleSession {
     order: snakeOrder(),
     turn: 0,
     placements: [],
+    roads: [],
     log: [],
+    pendingSettlement: null,
     reports: [],
-    phase: 'user-turn',
+    roadReports: [],
+    phase: 'user-settlement',
   };
   return runAuto(session);
 }
 
 /**
  * Apply the user's settlement choice: grade it against the options they were
- * actually choosing from, record it, then let opponents respond.
+ * actually choosing from, then wait for the matching setup road (official
+ * rules: each setup settlement is placed together with an attached road).
  */
-export function placeUser(session: PuzzleSession, vertex: VertexKey): PuzzleSession {
-  if (session.phase !== 'user-turn') return session;
+export function placeUserSettlement(session: PuzzleSession, vertex: VertexKey): PuzzleSession {
+  if (session.phase !== 'user-settlement') return session;
   if (!isLegal(session.board, session.placements, vertex)) return session;
 
   const step = session.reports.length + 1;
   const report = coachPlacement(session.board, session.placements, session.userSeat, vertex, step);
 
-  const s: PuzzleSession = {
+  return {
     ...session,
     placements: [...session.placements, { player: session.userSeat, vertex }],
-    log: [...session.log, { player: session.userSeat, vertex, auto: false }],
+    pendingSettlement: vertex,
     reports: [...session.reports, report],
+    phase: 'user-road',
+  };
+}
+
+/** Apply the user's setup road for the settlement they just placed. */
+export function placeUserRoad(session: PuzzleSession, edge: EdgeKey): PuzzleSession {
+  if (session.phase !== 'user-road' || session.pendingSettlement === null) return session;
+  if (!legalSetupRoads(session.roads, session.pendingSettlement).includes(edge)) return session;
+
+  const step = session.roadReports.length + 1;
+  const report = coachRoad(
+    session.board, session.placements, session.roads,
+    session.userSeat, session.pendingSettlement, edge, step,
+  );
+
+  const s: PuzzleSession = {
+    ...session,
+    roads: [...session.roads, { player: session.userSeat, edge }],
+    log: [
+      ...session.log,
+      { player: session.userSeat, vertex: session.pendingSettlement, road: edge, auto: false },
+    ],
+    roadReports: [...session.roadReports, report],
+    pendingSettlement: null,
     turn: session.turn + 1,
   };
   return runAuto(s);

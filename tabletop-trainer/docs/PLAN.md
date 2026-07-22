@@ -19,17 +19,17 @@ opponents have already placed.
 | Piece | What ships |
 |---|---|
 | Board engine | Seeded standard 19-hex board (correct tile/token pools, no adjacent 6/8, 9 ports), full vertex/edge topology, distance rule |
-| Puzzle flow | 4-player snake draft; you are one seat; opponents auto-place; your two settlement picks are the puzzle steps |
-| Opponent agents | Deterministic personalities: **greedy** (raw pips), **balanced** (score-max), **blocker** (denies your best spots) |
-| Coaching agent | Ranks all legal vertices with an explainable score breakdown; grades your pick (S–D), explains the gap vs. best in plain language; hint mode |
-| Interactive board | SVG hex board: click legal vertices, see tokens/pips/ports, player-colored settlements, hint & best-move overlays |
+| Puzzle flow | 4-player snake draft; each turn places a **settlement + attached road** (official setup rule); your two settlement-and-road turns are the puzzle steps |
+| Opponent agents | Deterministic personalities: **greedy** (raw pips), **balanced** (score-max), **blocker** (denies your best spots); all aim their setup roads at the best open expansion spot |
+| Coaching agent | Ranks all legal vertices with an explainable score breakdown; grades your settlement **and** your road (S–D), explains the gap vs. best in plain language; hint mode for both |
+| Interactive board | SVG hex board: click legal vertices and road edges, see tokens/pips/ports, player-colored settlements and roads, hint & best-move overlays |
 | Modes | Daily (date seed) + practice (random seed) + retry same board |
 
 Everything runs client-side — no backend, no secrets, deployable as static files.
 
 ## Phase 2+ (roadmap, not in MVP)
 
-1. **Roads** in the initial placement (score expansion direction), robber puzzles, trade puzzles.
+1. Robber-placement and trade-decision puzzles; road personalities per opponent.
 2. **LLM-powered coach narratives**: richer natural-language coaching via the Claude API.
    *Must* go through a small server/edge function — the API key never ships to the browser
    (see Security below).

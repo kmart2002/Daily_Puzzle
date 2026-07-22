@@ -1,6 +1,6 @@
-import { hexCorners, parseVertexKey, vertexPos } from '../engine/catan/board';
+import { EdgeKey, edgeEndpoints, hexCorners, parseVertexKey, vertexPos } from '../engine/catan/board';
 import { describeVertex } from '../engine/catan/evaluate';
-import { Board, PIPS, Placement, TileType, VertexKey } from '../engine/catan/types';
+import { Board, PIPS, Placement, Road, TileType, VertexKey } from '../engine/catan/types';
 
 const SIZE = 46;
 const PAD = 78;
@@ -32,12 +32,26 @@ export interface Overlay {
 interface BoardViewProps {
   board: Board;
   placements: Placement[];
+  roads: Road[];
   /** Vertices the user may click right now (empty when it isn't their turn). */
   legal: Set<VertexKey>;
   onVertexClick: (vertex: VertexKey) => void;
+  /** Road choices for the just-placed settlement (empty outside the road phase). */
+  legalEdges: { edge: EdgeKey; label: string }[];
+  onEdgeClick: (edge: EdgeKey) => void;
   seatColors: string[];
   overlays?: Overlay[];
   lastPlaced?: VertexKey | null;
+}
+
+/** Trim a segment at both ends so roads don't overlap settlement houses. */
+function trimmed(a: { x: number; y: number }, b: { x: number; y: number }, t = 0.18) {
+  return {
+    x1: a.x + (b.x - a.x) * t,
+    y1: a.y + (b.y - a.y) * t,
+    x2: b.x - (b.x - a.x) * t,
+    y2: b.y - (b.y - a.y) * t,
+  };
 }
 
 const OVERLAY_COLORS: Record<Overlay['tone'], string> = {
@@ -48,7 +62,8 @@ const OVERLAY_COLORS: Record<Overlay['tone'], string> = {
 };
 
 export function BoardView({
-  board, placements, legal, onVertexClick, seatColors, overlays = [], lastPlaced,
+  board, placements, roads, legal, onVertexClick, legalEdges, onEdgeClick,
+  seatColors, overlays = [], lastPlaced,
 }: BoardViewProps) {
   const positions = new Map(
     board.vertexKeys.map((k) => [k, vertexPos(parseVertexKey(k), SIZE)]),
@@ -128,6 +143,47 @@ export function BoardView({
             <text x={ox} y={oy + 4} textAnchor="middle" fontSize={port.kind === 'any' ? 11 : 9} fontWeight={700} fill="#5b4426">
               {label}
             </text>
+          </g>
+        );
+      })}
+
+      {/* Roads */}
+      {roads.map((road) => {
+        const [ka, kb] = edgeEndpoints(road.edge);
+        const seg = trimmed(positions.get(ka)!, positions.get(kb)!);
+        return (
+          <g key={`r-${road.edge}`}>
+            <line {...seg} stroke="#1f2937" strokeWidth={9} strokeLinecap="round" />
+            <line {...seg} stroke={seatColors[road.player]} strokeWidth={5.5} strokeLinecap="round" />
+          </g>
+        );
+      })}
+
+      {/* Legal road choices for the pending settlement */}
+      {legalEdges.map(({ edge, label }) => {
+        const [ka, kb] = edgeEndpoints(edge);
+        const seg = trimmed(positions.get(ka)!, positions.get(kb)!, 0.14);
+        return (
+          <g
+            key={`le-${edge}`}
+            className="legal-edge"
+            role="button"
+            tabIndex={0}
+            aria-label={label}
+            onClick={() => onEdgeClick(edge)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') onEdgeClick(edge);
+            }}
+          >
+            <line {...seg} stroke="#ffffff00" strokeWidth={16} strokeLinecap="round" />
+            <line
+              className="legal-edge-line"
+              {...seg}
+              stroke="#2563eb"
+              strokeWidth={5}
+              strokeLinecap="round"
+              strokeDasharray="7 5"
+            />
           </g>
         );
       })}

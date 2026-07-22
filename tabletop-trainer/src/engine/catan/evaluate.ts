@@ -1,8 +1,10 @@
-import { parseVertexKey, touchingHexes, vertexKey, vertexNeighbors } from './board';
-import { hexAt } from './generator';
-import { isLegal, legalVertices } from './rules';
 import {
-  Board, PIPS, Placement, Port, Resource, RESOURCES, VertexKey,
+  EdgeKey, edgeEndpoints, parseVertexKey, touchingHexes, vertexKey, vertexNeighbors,
+} from './board';
+import { hexAt } from './generator';
+import { isLegal, legalSetupRoads, legalVertices } from './rules';
+import {
+  Board, PIPS, Placement, Port, Resource, RESOURCES, Road, VertexKey,
 } from './types';
 
 /** Tunable weights — change here only (see /tune-heuristics skill). */
@@ -195,6 +197,49 @@ export function rankVertices(
   return legalVertices(board, placements)
     .map((v) => scoreVertex(board, placements, player, v))
     .sort((a, b) => b.total - a.total || a.vertex.localeCompare(b.vertex));
+}
+
+/**
+ * A candidate setup road from a settlement. Since the distance rule forbids
+ * settling the road's far endpoint, a setup road is about direction: its value
+ * is the best future settlement spot it moves you one road closer to
+ * (vertices adjacent to the far endpoint that are currently legal).
+ */
+export interface RoadCandidate {
+  edge: EdgeKey;
+  /** The endpoint away from the settlement. */
+  toward: VertexKey;
+  /** Best future spot this road points at (null if it points at nothing). */
+  target: VertexKey | null;
+  targetScore: ScoreBreakdown | null;
+  value: number;
+}
+
+export function roadCandidates(
+  board: Board,
+  placements: Placement[],
+  roads: Road[],
+  player: number,
+  settlementVertex: VertexKey,
+): RoadCandidate[] {
+  return legalSetupRoads(roads, settlementVertex)
+    .map((edge) => {
+      const [a, b] = edgeEndpoints(edge);
+      const toward = a === settlementVertex ? b : a;
+      let target: VertexKey | null = null;
+      let targetScore: ScoreBreakdown | null = null;
+      for (const n of vertexNeighbors(parseVertexKey(toward))) {
+        const key = vertexKey(n);
+        if (key === settlementVertex || !isLegal(board, placements, key)) continue;
+        const s = scoreVertex(board, placements, player, key);
+        if (!targetScore || s.total > targetScore.total) {
+          target = key;
+          targetScore = s;
+        }
+      }
+      return { edge, toward, target, targetScore, value: targetScore?.total ?? 0 };
+    })
+    .sort((a, b) => b.value - a.value || a.edge.localeCompare(b.edge));
 }
 
 /** Human-readable description of a vertex, e.g. "6 grain / 9 ore / 11 wool". */

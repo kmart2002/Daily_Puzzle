@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
+import { EdgeKey } from './engine/catan/board';
 import { hints } from './engine/catan/coach';
-import { describeVertex } from './engine/catan/evaluate';
-import { createSession, placeUser } from './engine/catan/puzzle';
+import { describeVertex, roadCandidates } from './engine/catan/evaluate';
+import { createSession, placeUserRoad, placeUserSettlement } from './engine/catan/puzzle';
 import { legalVertices } from './engine/catan/rules';
 import { VertexKey } from './engine/catan/types';
 import { BoardView, Overlay } from './ui/BoardView';
@@ -40,21 +41,44 @@ export default function App() {
   }
 
   function handlePlace(vertex: VertexKey) {
-    setSession((s) => placeUser(s, vertex));
+    setSession((s) => placeUserSettlement(s, vertex));
+    setHintsShown(false);
+  }
+
+  function handleRoad(edge: EdgeKey) {
+    setSession((s) => placeUserRoad(s, edge));
     setHintsShown(false);
   }
 
   const legal = useMemo(
     () =>
-      session.phase === 'user-turn'
+      session.phase === 'user-settlement'
         ? new Set(legalVertices(session.board, session.placements))
         : new Set<VertexKey>(),
     [session],
   );
 
+  const currentRoadOptions = useMemo(
+    () =>
+      session.phase === 'user-road' && session.pendingSettlement
+        ? roadCandidates(
+            session.board, session.placements, session.roads,
+            session.userSeat, session.pendingSettlement,
+          )
+        : [],
+    [session],
+  );
+
+  const legalEdges = currentRoadOptions.map((c) => ({
+    edge: c.edge,
+    label: c.target
+      ? `Place road toward ${describeVertex(session.board, c.target)}`
+      : 'Place road toward the coast',
+  }));
+
   const currentHints = useMemo(
     () =>
-      session.phase === 'user-turn' && hintsShown
+      session.phase === 'user-settlement' && hintsShown
         ? hints(session.board, session.placements, session.userSeat, 3)
         : [],
     [session, hintsShown],
@@ -65,6 +89,9 @@ export default function App() {
     currentHints.forEach((h, i) => {
       overlays.push({ vertex: h.spot.vertex, label: `#${i + 1}`, tone: HINT_TONES[i] });
     });
+    currentRoadOptions.slice(0, 3).forEach((c, i) => {
+      if (c.target) overlays.push({ vertex: c.target, label: `#${i + 1}`, tone: HINT_TONES[i] });
+    });
   }
   if (showBest && session.phase === 'done') {
     for (const report of session.reports) {
@@ -74,9 +101,18 @@ export default function App() {
     }
   }
 
-  const hintLines = currentHints.map(
-    (h, i) => `#${i + 1} ${describeVertex(session.board, h.spot.vertex)} — ${h.reason}`,
-  );
+  const hintLines =
+    session.phase === 'user-road'
+      ? currentRoadOptions
+          .slice(0, 3)
+          .map((c, i) =>
+            c.target
+              ? `#${i + 1} toward ${describeVertex(session.board, c.target)} — expansion value ${c.value.toFixed(1)}`
+              : `#${i + 1} toward the coast — no future spot that way`,
+          )
+      : currentHints.map(
+          (h, i) => `#${i + 1} ${describeVertex(session.board, h.spot.vertex)} — ${h.reason}`,
+        );
 
   const lastPlaced = session.log.length > 0 ? session.log[session.log.length - 1].vertex : null;
 
@@ -102,16 +138,22 @@ export default function App() {
           <BoardView
             board={session.board}
             placements={session.placements}
+            roads={session.roads}
             legal={legal}
             onVertexClick={handlePlace}
+            legalEdges={legalEdges}
+            onEdgeClick={handleRoad}
             seatColors={SEAT_COLORS}
             overlays={overlays}
             lastPlaced={lastPlaced}
           />
           <p className="board-hint">
-            {session.phase === 'user-turn'
-              ? 'Click a highlighted vertex to place your settlement.'
-              : 'Draft complete — read your coach’s report, then retry or grab a practice board.'}
+            {session.phase === 'user-settlement' &&
+              'Click a highlighted vertex to place your settlement.'}
+            {session.phase === 'user-road' &&
+              'Now click a dashed edge to place the road that comes with it.'}
+            {session.phase === 'done' &&
+              'Draft complete — read your coach’s report, then retry or grab a practice board.'}
           </p>
         </div>
         <CoachPanel

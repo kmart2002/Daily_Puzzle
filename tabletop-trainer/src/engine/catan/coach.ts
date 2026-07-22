@@ -1,7 +1,8 @@
+import { EdgeKey } from './board';
 import {
-  describeVertex, rankVertices, scoreVertex, ScoreBreakdown,
+  describeVertex, rankVertices, roadCandidates, RoadCandidate, scoreVertex, ScoreBreakdown,
 } from './evaluate';
-import { Board, Placement, Resource, VertexKey } from './types';
+import { Board, Placement, Resource, Road, VertexKey } from './types';
 
 export type Grade = 'S' | 'A' | 'B' | 'C' | 'D';
 
@@ -136,6 +137,79 @@ export function coachPlacement(
     headline: HEADLINES[grade],
     details,
     alternatives: ranked.filter((s) => s.vertex !== chosenVertex).slice(0, 3),
+  };
+}
+
+export interface RoadReport {
+  step: number;
+  player: number;
+  chosen: RoadCandidate;
+  best: RoadCandidate;
+  rank: number;
+  outOf: number;
+  grade: Grade;
+  headline: string;
+  details: string[];
+}
+
+function roadGrade(rank: number, gap: number): Grade {
+  if (rank === 1) return 'S';
+  if (gap < 0.5) return 'A';
+  if (gap < 1.5) return 'B';
+  if (gap < 3) return 'C';
+  return 'D';
+}
+
+const ROAD_HEADLINES: Record<Grade, string> = {
+  S: 'Best road available — pointed straight at your next spot.',
+  A: 'Fine road — the directions were nearly equal.',
+  B: 'Playable, but another direction promised more.',
+  C: 'Aimed at thin territory while a rich direction was open.',
+  D: 'This road points at nothing you can ever build on.',
+};
+
+/**
+ * Grade the setup road placed with a settlement. `placements`/`roads` are the
+ * state at decision time (the settlement itself is already in `placements`).
+ */
+export function coachRoad(
+  board: Board,
+  placements: Placement[],
+  roads: Road[],
+  player: number,
+  settlementVertex: VertexKey,
+  chosenEdge: EdgeKey,
+  step: number,
+): RoadReport {
+  const candidates = roadCandidates(board, placements, roads, player, settlementVertex);
+  const chosen = candidates.find((c) => c.edge === chosenEdge) ?? candidates[0];
+  const best = candidates[0];
+  const rank = Math.max(1, candidates.findIndex((c) => c.edge === chosenEdge) + 1);
+  const gap = best.value - chosen.value;
+  const grade = roadGrade(rank, gap);
+
+  const details: string[] = [];
+  if (chosen.target && chosen.targetScore) {
+    details.push(
+      `Your road points toward ${describeVertex(board, chosen.target)} ` +
+        `(worth ${chosen.targetScore.total.toFixed(1)} as a future settlement).`,
+    );
+  } else {
+    details.push('Your road points toward a dead end — every spot beyond it is blocked.');
+  }
+  if (rank !== 1 && best.target) {
+    details.push(
+      `The best road aimed at ${describeVertex(board, best.target)} ` +
+        `(worth ${best.value.toFixed(1)}), ${gap.toFixed(1)} points more expansion value.`,
+    );
+  }
+  if (rank === 1 && candidates.length > 1) {
+    details.push('You read the map correctly — no direction offered more.');
+  }
+
+  return {
+    step, player, chosen, best, rank, outOf: candidates.length, grade,
+    headline: ROAD_HEADLINES[grade], details,
   };
 }
 

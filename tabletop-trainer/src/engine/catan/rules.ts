@@ -1,5 +1,5 @@
-import { parseVertexKey, vertexKey, vertexNeighbors } from './board';
-import { Board, Placement, VertexKey } from './types';
+import { EdgeKey, parseVertexKey, vertexEdges, vertexKey, vertexNeighbors } from './board';
+import { Board, Placement, Road, VertexKey } from './types';
 
 export function occupiedSet(placements: Placement[]): Set<VertexKey> {
   return new Set(placements.map((p) => p.vertex));
@@ -16,6 +16,15 @@ export function isLegal(board: Board, placements: Placement[], vertex: VertexKey
   return !vertexNeighbors(parseVertexKey(vertex))
     .map(vertexKey)
     .some((n) => occupied.has(n));
+}
+
+/**
+ * Setup-phase road legality: the official rules require each setup road to
+ * attach to the settlement just placed, on a free edge.
+ */
+export function legalSetupRoads(roads: Road[], settlementVertex: VertexKey): EdgeKey[] {
+  const taken = new Set(roads.map((r) => r.edge));
+  return vertexEdges(parseVertexKey(settlementVertex)).filter((e) => !taken.has(e));
 }
 
 export function legalVertices(board: Board, placements: Placement[]): VertexKey[] {

@@ -1,4 +1,5 @@
-import { CoachReport, Grade } from '../engine/catan/coach';
+import { edgeEndpoints } from '../engine/catan/board';
+import { CoachReport, Grade, RoadReport } from '../engine/catan/coach';
 import { describeVertex } from '../engine/catan/evaluate';
 import { PuzzleSession } from '../engine/catan/puzzle';
 
@@ -25,6 +26,32 @@ function GradeBadge({ grade }: { grade: Grade }) {
     <span className="grade-badge" style={{ background: GRADE_COLORS[grade] }}>
       {grade}
     </span>
+  );
+}
+
+function RoadReportCard({ report, board }: { report: RoadReport; board: PuzzleSession['board'] }) {
+  return (
+    <div className="report-card road-report">
+      <div className="report-head">
+        <GradeBadge grade={report.grade} />
+        <div>
+          <div className="report-title">
+            Road #{report.step} — ranked #{report.rank} of {report.outOf}
+          </div>
+          <div className="report-headline">{report.headline}</div>
+        </div>
+      </div>
+      <ul>
+        {report.details.map((d, i) => (
+          <li key={i}>{d}</li>
+        ))}
+      </ul>
+      {report.rank !== 1 && report.best.target && (
+        <div className="alt-line">
+          Best road aimed at <strong>{describeVertex(board, report.best.target)}</strong>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -57,8 +84,13 @@ function ReportCard({ report, board }: { report: CoachReport; board: PuzzleSessi
 export function CoachPanel({
   session, seatColors, hintsShown, onToggleHints, hintLines, showBest, onToggleBest,
 }: CoachPanelProps) {
-  const { board, seats, log, reports, phase } = session;
-  const step = reports.length + 1;
+  const { board, seats, log, reports, roadReports, phase } = session;
+  const step = phase === 'user-road' ? reports.length : reports.length + 1;
+
+  const roadToward = (vertex: string, edge: string) => {
+    const toward = edgeEndpoints(edge).find((v) => v !== vertex)!;
+    return describeVertex(board, toward);
+  };
 
   return (
     <aside className="coach-panel">
@@ -81,17 +113,24 @@ export function CoachPanel({
           {log.map((move, i) => (
             <li key={i}>
               <span className="seat-swatch" style={{ background: seatColors[move.player] }} />
-              {seats[move.player].name} → {describeVertex(board, move.vertex)}
+              <span>
+                {seats[move.player].name} → {describeVertex(board, move.vertex)}
+                <span className="road-note"> · road toward {roadToward(move.vertex, move.road)}</span>
+              </span>
             </li>
           ))}
-          {phase === 'user-turn' && (
+          {phase !== 'done' && (
             <li className="your-turn">
               <span className="seat-swatch" style={{ background: seatColors[session.userSeat] }} />
-              <strong>Your turn — place settlement #{step}</strong>
+              <strong>
+                {phase === 'user-settlement'
+                  ? `Your turn — place settlement #${step}`
+                  : `Now place the road for settlement #${step}`}
+              </strong>
             </li>
           )}
         </ol>
-        {phase === 'user-turn' && (
+        {phase !== 'done' && (
           <div className="hint-block">
             <button onClick={onToggleHints}>{hintsShown ? 'Hide hints' : 'Coach, give me a hint'}</button>
             {hintsShown && (
@@ -108,8 +147,11 @@ export function CoachPanel({
       {reports.length > 0 && (
         <section>
           <h2>Coach&rsquo;s report</h2>
-          {reports.map((r) => (
-            <ReportCard key={r.step} report={r} board={board} />
+          {reports.map((r, i) => (
+            <div key={r.step}>
+              <ReportCard report={r} board={board} />
+              {roadReports[i] && <RoadReportCard report={roadReports[i]} board={board} />}
+            </div>
           ))}
           {phase === 'done' && (
             <button onClick={onToggleBest}>

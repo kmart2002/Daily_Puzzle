@@ -23,14 +23,15 @@ No backend, no keys, no third-party runtime deps beyond React.
 
 ## How to play
 
-1. Two opponents place before you (snake draft — you're seat 3 of 4).
-2. Click a highlighted vertex to place your first settlement. Ask the coach for
-   a hint if you're stuck.
+1. Two opponents place before you (snake draft — you're seat 3 of 4). As in the
+   official setup rules, every turn places a settlement **and** an attached road.
+2. Click a highlighted vertex to place your first settlement, then click a
+   dashed edge to aim its road. Ask the coach for a hint at either step.
 3. Opponents respond — including **Blocker Bianca**, who will happily steal the
-   spot you were saving — then you place your second settlement.
-4. The coach's report grades each pick, compares it to the best available
-   alternative, and can overlay the best spots on the board. Retry the same
-   board or grab a random practice board.
+   spot you were saving — then you place your second settlement and road.
+4. The coach's report grades every settlement and road, compares each to the
+   best available alternative, and can overlay the best spots on the board.
+   Retry the same board or grab a random practice board.
 
 ## Repo layout
 

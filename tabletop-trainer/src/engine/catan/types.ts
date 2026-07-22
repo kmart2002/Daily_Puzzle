@@ -45,6 +45,12 @@ export interface Placement {
   vertex: VertexKey;
 }
 
+export interface Road {
+  player: number;
+  /** EdgeKey from board.ts: the two endpoint vertex keys joined by "|". */
+  edge: string;
+}
+
 /** Pips (probability dots) per number token — how often the number rolls. */
 export const PIPS: Record<number, number> = {
   2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3, 11: 2, 12: 1,
