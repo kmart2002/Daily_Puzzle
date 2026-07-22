@@ -53,9 +53,31 @@ describe('evaluation', () => {
     const board = generateBoard('component-sum');
     for (const s of rankVertices(board, [], 0).slice(0, 10)) {
       const sum =
-        s.weightedPips + s.diversityBonus + s.comboBonus + s.portBonus + s.expansionBonus;
+        s.weightedPips + s.diversityBonus + s.comboBonus + s.portBonus + s.expansionBonus -
+        s.overlapPenalty;
       expect(s.total).toBeCloseTo(sum, 9);
     }
+  });
+
+  it('P5 roll coverage: a duplicated number scores below a fresh number of equal pips', () => {
+    const board = generateBoard('golden-base');
+    board.hexes = board.hexes.map((h) => ({ ...h, tile: 'desert' as const, token: null }));
+    const set = (q: number, r: number, tile: 'ore' | 'grain', token: number) => {
+      const hex = board.hexes.find((h) => h.q === q && h.r === r)!;
+      hex.tile = tile;
+      hex.token = token;
+    };
+    set(0, 0, 'grain', 6); // first settlement's number
+    set(0, -2, 'ore', 6); // candidate A: duplicates the owned 6
+    set(2, -2, 'ore', 8); // candidate B: same pips, different hot number
+    const placements = [{ player: 0, vertex: '0,1,N' }]; // touches (0,0) → owns the 6
+    const dup = scoreVertex(board, placements, 0, '0,-2,N'); // touches (0,-2) only
+    const fresh = scoreVertex(board, placements, 0, '2,-2,N'); // touches (2,-2) only
+    expect(dup.pips).toBe(fresh.pips);
+    expect(dup.duplicatedNumbers).toEqual([6]);
+    expect(fresh.duplicatedNumbers).toEqual([]);
+    expect(dup.overlapPenalty).toBeGreaterThan(0);
+    expect(fresh.total).toBeGreaterThan(dup.total);
   });
 
   it('second placement values resources the player is missing', () => {

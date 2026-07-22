@@ -71,8 +71,25 @@ export function coachPlacement(
   const gap = best.total - chosen.total;
   const grade = gradeFor(rank, gap);
 
+  // Coaching language follows the competitive-play spec in
+  // docs/specs/catan-opening.md (principle ids P1-P12 referenced below).
   const details: string[] = [];
   details.push(`You took ${describeVertex(board, chosenVertex)} — ${prodSummary(chosen)}.`);
+
+  // P1: pip bands pros use — ~9 weak, 10-11 solid, 12-13+ strong.
+  if (step === 1) {
+    if (chosen.pips >= 12) {
+      details.push(
+        `${chosen.pips} pips clears the 12-13 bar competitive players treat as a premium opening.`,
+      );
+    } else if (chosen.pips >= 10) {
+      details.push(`${chosen.pips} pips clears the 10-pip bar strong players want from an opener.`);
+    } else {
+      details.push(
+        `${chosen.pips} pips is below the 10-pip bar strong players look for in an opening settlement — you'd be relying on lucky dice to keep up.`,
+      );
+    }
+  }
 
   if (rank === 1) {
     if (ranked[1]) {
@@ -103,27 +120,65 @@ export function coachPlacement(
     details.push('This doubles down on resources you already had — second placements usually want to fill gaps.');
   }
 
-  if (chosen.combosCompleted.length > 0) {
-    details.push(`It completes your ${chosen.combosCompleted.join(' and ')}.`);
-  } else if (rank !== 1 && best.combosCompleted.length > 0) {
-    details.push(`The top spot would have completed a ${best.combosCompleted.join(' and ')}.`);
+  // P2/P3: the two classic archetypes and why pros pick them.
+  for (const combo of chosen.combosCompleted) {
+    details.push(
+      combo.startsWith('city')
+        ? 'It sets up the ore + grain engine — the city-and-development-card plan competitive players rate as the highest-ceiling opening when a good corner offers it.'
+        : 'It sets up the brick + lumber engine — the road-race plan pros pivot to for grabbing extra settlements when the ore/wheat corners are taken.',
+    );
+  }
+  if (chosen.combosCompleted.length === 0 && rank !== 1 && best.combosCompleted.length > 0) {
+    details.push(
+      `The top spot would have completed the ${best.combosCompleted.join(' and ')} — an engine, not just pips.`,
+    );
   }
 
+  // P5: roll coverage — stacking an owned number is robber bait.
+  if (chosen.duplicatedNumbers.length > 0) {
+    const nums = chosen.duplicatedNumbers.join(' and ');
+    details.push(
+      `You already collect on ${nums}; doubling up means a single robber can freeze both settlements at once. Pros pay a premium for a different number with the same pips — it covers more rolls.`,
+    );
+  }
+
+  // P6/P7: a port is only as good as the production behind it.
   if (chosen.port) {
     const kind = chosen.port.kind;
+    if (kind === 'any') {
+      details.push('The 3:1 port adds trade flexibility once your production is rolling.');
+    } else {
+      const backing = chosen.production[kind] ?? 0;
+      details.push(
+        chosen.portBonus > 1.2
+          ? `The 2:1 ${kind} port is backed by real ${kind} production — surplus becomes whatever you're missing, the only port play pros respect.`
+          : `Careful: that 2:1 ${kind} port looks shiny, but with ${backing} ${kind} pip${backing === 1 ? '' : 's'} behind it, it's the classic first-pick port trap — a port produces nothing by itself.`,
+      );
+    }
+  }
+
+  // P4: scarcity is trading leverage, not just pips.
+  if (chosen.weightedPips < chosen.pips * 0.92) {
     details.push(
-      kind === 'any'
-        ? 'The 3:1 port gives you trade flexibility.'
-        : `The 2:1 ${kind} port pairs with your ${kind} production — a real trading engine.`,
+      'This production leans on resources that are plentiful this board — everyone will have them, so each pip trades below face value.',
+    );
+  } else if (chosen.weightedPips > chosen.pips * 1.08 && chosen.pips > 0) {
+    details.push(
+      'Good scarcity play — these resources are rare on this board, so beyond the pips you gain real trading leverage over everyone who lacks them.',
     );
   }
 
-  if (chosen.weightedPips < chosen.pips * 0.92) {
-    details.push(
-      'Careful: this production leans on resources that are plentiful this board, so each pip trades below face value.',
-    );
-  } else if (chosen.weightedPips > chosen.pips * 1.08 && chosen.pips > 0) {
-    details.push('Good scarcity play — these resources are rare on this board, so your pips are worth extra.');
+  // P11: a block is free when the spot was also an opponent's best option.
+  const NUM_PLAYERS = 4;
+  for (let p = 0; p < NUM_PLAYERS; p++) {
+    if (p === player) continue;
+    const theirBest = rankVertices(board, placementsBefore, p)[0];
+    if (theirBest && theirBest.vertex === chosenVertex) {
+      details.push(
+        'Bonus: this was also an opponent’s best remaining spot — a free block, which is exactly when pros say denying is worth it.',
+      );
+      break;
+    }
   }
 
   if (rank !== 1 && best.expansionSpots > chosen.expansionSpots + 3) {
@@ -207,11 +262,14 @@ export function coachRoad(
   if (rank !== 1 && best.target) {
     details.push(
       `The best road aimed at ${describeVertex(board, best.target)} ` +
-        `(worth ${best.value.toFixed(1)}), ${gap.toFixed(1)} points more expansion value.`,
+        `(worth ${best.value.toFixed(1)}), ${gap.toFixed(1)} points more expansion value. ` +
+        'Pros aim setup roads at the best spot they can still legally reach — not at the crowded middle, where everyone else is racing too.',
     );
   }
   if (rank === 1 && candidates.length > 1) {
-    details.push('You read the map correctly — no direction offered more.');
+    details.push(
+      'You read the map correctly — no direction offered a better reachable spot, which is exactly how competitive players pick setup roads.',
+    );
   }
 
   return {

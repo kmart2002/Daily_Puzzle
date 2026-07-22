@@ -21,7 +21,7 @@ opponents have already placed.
 | Board engine | Seeded standard 19-hex board (correct tile/token pools, no adjacent 6/8, 9 ports), full vertex/edge topology, distance rule |
 | Puzzle flow | 4-player snake draft; each turn places a **settlement + attached road** (official setup rule); your two settlement-and-road turns are the puzzle steps |
 | Opponent agents | Deterministic personalities: **greedy** (raw pips), **balanced** (score-max), **blocker** (denies your best spots); all aim their setup roads at the best open expansion spot |
-| Coaching agent | Ranks all legal vertices with an explainable score breakdown; grades your settlement **and** your road (S–D), explains the gap vs. best in plain language; hint mode for both |
+| Coaching agent | Ranks all legal vertices with an explainable score breakdown; grades your settlement **and** your road (S–D), explains the gap vs. best using competitive-play principles (`docs/specs/catan-opening.md`: pip bands, OWS vs wood-brick archetypes, scarcity leverage, roll coverage, port traps, cheap blocks); hint mode for both |
 | Interactive board | SVG hex board: click legal vertices and road edges, see tokens/pips/ports, player-colored settlements and roads, hint & best-move overlays |
 | Modes | Daily set of **5 puzzles** (date-seeded, same for everyone) + practice (random seed) + retry same board + `?seed=` deep links |
 | Daily email | GitHub Action emails the day's 5 puzzle links each morning (see `.github/workflows/daily-puzzle-email.yml`; SMTP creds live in repo secrets, never in code) |

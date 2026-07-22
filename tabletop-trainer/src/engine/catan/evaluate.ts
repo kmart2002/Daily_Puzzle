@@ -19,6 +19,9 @@ export const WEIGHTS = {
   expansionCap: 1.0,
   scarcityMin: 0.7,
   scarcityMax: 1.5,
+  /** P5 (docs/specs/catan-opening.md): stacking a number you already own means
+   *  one robber placement can block both settlements at once. */
+  numberOverlapPerPip: 0.25,
 } as const;
 
 export type Production = Partial<Record<Resource, number>>;
@@ -45,7 +48,31 @@ export interface ScoreBreakdown {
   /** How many nearby spots stay open to expand toward. */
   expansionSpots: number;
   expansionBonus: number;
+  /** Number tokens here that the player's settlements already collect on. */
+  duplicatedNumbers: number[];
+  /** Roll-coverage penalty for stacking already-owned numbers (subtracted). */
+  overlapPenalty: number;
   total: number;
+}
+
+/** The number tokens adjacent to a vertex (duplicates included). */
+export function vertexTokens(board: Board, vertex: VertexKey): number[] {
+  const tokens: number[] = [];
+  for (const { q, r } of touchingHexes(parseVertexKey(vertex))) {
+    const hex = hexAt(board, q, r);
+    if (hex?.token != null) tokens.push(hex.token);
+  }
+  return tokens;
+}
+
+/** All number tokens a player's existing settlements collect on. */
+export function playerTokens(board: Board, placements: Placement[], player: number): Set<number> {
+  const owned = new Set<number>();
+  for (const p of placements) {
+    if (p.player !== player) continue;
+    for (const t of vertexTokens(board, p.vertex)) owned.add(t);
+  }
+  return owned;
 }
 
 /** Pips per resource produced at a vertex. */
@@ -169,7 +196,18 @@ export function scoreVertex(
   const spots = expansionSpots(board, placements, vertex);
   const expansionBonus = Math.min(WEIGHTS.expansionCap, WEIGHTS.expansionPerSpot * spots);
 
-  const total = weightedPips + diversityBonus + comboBonus + portBonus + expansionBonus;
+  // P5 roll coverage: two settlements on the same number have the same pip sum
+  // as two on different numbers, but one robber (or one cold number) can shut
+  // both off at once — so duplicated numbers trade below face value.
+  const ownedTokens = playerTokens(board, placements, player);
+  const duplicatedNumbers = [...new Set(vertexTokens(board, vertex))].filter((t) =>
+    ownedTokens.has(t),
+  );
+  const overlapPenalty =
+    WEIGHTS.numberOverlapPerPip * duplicatedNumbers.reduce((s, t) => s + PIPS[t], 0);
+
+  const total =
+    weightedPips + diversityBonus + comboBonus + portBonus + expansionBonus - overlapPenalty;
 
   return {
     vertex,
@@ -184,6 +222,8 @@ export function scoreVertex(
     portBonus,
     expansionSpots: spots,
     expansionBonus,
+    duplicatedNumbers,
+    overlapPenalty,
     total,
   };
 }
