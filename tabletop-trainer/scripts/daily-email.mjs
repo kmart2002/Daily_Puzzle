@@ -8,7 +8,7 @@
  */
 import { writeFileSync } from 'node:fs';
 
-const APP_URL = (process.env.APP_URL ?? 'https://kmart2002.github.io/improved-engine/tabletop-trainer/')
+const APP_URL = (process.env.APP_URL ?? 'https://kmart2002.github.io/Daily_Puzzle/tabletop-trainer/')
   .replace(/\/?$/, '/');
 
 const now = new Date();

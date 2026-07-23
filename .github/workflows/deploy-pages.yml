@@ -7,7 +7,7 @@ name: Deploy site to GitHub Pages
 
 on:
   push:
-    branches: [claude/affectionate-goldberg-0m8gwv] # repo default branch
+    branches: [main] # repo default branch
   workflow_dispatch:
 
 permissions:
