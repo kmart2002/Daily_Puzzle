@@ -8,7 +8,9 @@
  */
 import { writeFileSync } from 'node:fs';
 
-const APP_URL = (process.env.APP_URL ?? 'https://kmart2002.github.io/Daily_Puzzle/tabletop-trainer/')
+// Use `||` not `??`: an unset repo variable arrives as an empty string, which
+// `??` would keep — falling back only on null/undefined would break the links.
+const APP_URL = (process.env.APP_URL?.trim() || 'https://kmart2002.github.io/Daily_Puzzle/tabletop-trainer/')
   .replace(/\/?$/, '/');
 
 const now = new Date();
