@@ -33,7 +33,7 @@ jobs:
   send:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Generate today's puzzle email
         id: gen
@@ -44,7 +44,7 @@ jobs:
       # Preview path: upload the rendered email so you can inspect it, no send.
       - name: Upload email preview (dry run)
         if: ${{ inputs.dry_run }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: puzzle-email
           path: email.html
@@ -52,7 +52,7 @@ jobs:
       # Send path: default for scheduled runs and normal manual runs.
       - name: Send email
         if: ${{ !inputs.dry_run }}
-        uses: dawidd6/action-send-mail@v3
+        uses: dawidd6/action-send-mail@v18
         with:
           server_address: smtp.gmail.com
           server_port: 465
