@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "email": "node scripts/daily-email.mjs && echo 'Wrote email.html — open it to preview today'\\''s email.'"
   },
   "dependencies": {
     "react": "^18.3.1",
