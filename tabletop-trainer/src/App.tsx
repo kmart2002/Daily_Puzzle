@@ -7,6 +7,7 @@ import { legalVertices } from './engine/catan/rules';
 import { VertexKey } from './engine/catan/types';
 import { BoardView, Overlay } from './ui/BoardView';
 import { CoachPanel } from './ui/CoachPanel';
+import { SubscribeCard } from './ui/SubscribeCard';
 
 export const DAILY_SET_SIZE = 5;
 
@@ -214,6 +215,9 @@ export default function App() {
           onFocusStep={setFocusStep}
         />
       </main>
+      <footer className="app-footer">
+        <SubscribeCard />
+      </footer>
     </div>
   );
 }

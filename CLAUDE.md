@@ -25,7 +25,11 @@ Two independent projects live here:
 - Scoring must stay **explainable**: `evaluate.ts` returns a component breakdown
   that `coach.ts` turns into sentences. Never collapse it to an opaque number.
 - Repeatable tasks have skills: `/add-game-adapter`, `/add-opponent-personality`,
-  `/tune-heuristics`. Use them instead of improvising.
+  `/tune-heuristics`, `/add-edge-function`, `/design-architecture`. Use them
+  instead of improvising, and add a new skill whenever a task recurs.
+- Server code (`supabase/`) follows one rule: **the client sends intent, the
+  server decides outcomes**. Pure logic lives in `src/server/` or `src/engine/`
+  with tests; Edge Functions stay thin IO wrappers.
 - Before pushing: run tests + build, then the `puzzle-reviewer` agent checklist
   (`.claude/agents/puzzle-reviewer.md`); use `/code-review` and `/security-review`
   for larger changes.

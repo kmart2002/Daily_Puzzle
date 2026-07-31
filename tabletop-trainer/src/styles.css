@@ -339,3 +339,79 @@ main {
   margin: 0 0 12px;
   width: 100%;
 }
+
+.app-footer {
+  margin-top: 20px;
+}
+
+.subscribe-card {
+  background: #f7f5ef;
+  border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: 0 12px 30px #00000040;
+  max-width: 560px;
+}
+
+.subscribe-card h2 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  color: #33302a;
+}
+
+.subscribe-note {
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: #6b6249;
+  line-height: 1.5;
+}
+
+.subscribe-card form {
+  display: grid;
+  gap: 6px;
+}
+
+.subscribe-card label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #8a7f66;
+}
+
+.subscribe-card input {
+  font: inherit;
+  font-size: 14px;
+  padding: 9px 11px;
+  border: 1px solid #d9cfae;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #33302a;
+}
+
+.subscribe-card input:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
+.subscribe-card button {
+  margin-top: 8px;
+  justify-self: start;
+  border: 1px solid #c9b98c;
+  background: #efe6cd;
+  color: #5b4426;
+}
+
+.subscribe-card button:hover:not(:disabled) {
+  background: #e6d9b6;
+}
+
+.subscribe-card button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.subscribe-error {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #b91c1c;
+}
