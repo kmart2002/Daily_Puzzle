@@ -54,11 +54,30 @@ supabase functions serve submit-score  # local function
 
 ## Deploy
 
+One command, idempotent — it re-runs the unit tests, syncs the shared engine and
+server modules into `_shared/`, applies migrations, and deploys every function:
+
 ```bash
-supabase link --project-ref <ref>
-supabase db push
-supabase functions deploy submit-score
+./supabase/deploy.sh <project-ref>
 ```
+
+Then verify the live deployment, including its security properties:
+
+```bash
+./supabase/smoke-test.sh https://<project-ref>.supabase.co/functions/v1
+# optionally add an address you control to test a real signup email:
+./supabase/smoke-test.sh https://<ref>.supabase.co/functions/v1 you@example.com
+```
+
+The smoke test asserts the leaderboard exposes no email field, scoring rejects
+unauthenticated callers, `send-daily` is not publicly triggerable, an unsubscribe
+GET cannot act without a POST, and neither `/subscribe` nor `/login` reveals
+whether an address is registered. It exits non-zero on failure, so it can gate a
+release.
+
+Migrations are verified to apply cleanly and idempotently against a real
+PostgreSQL 16, with the check constraints, first-attempt-wins primary key,
+idempotent send claim, and rate-limit function all exercised.
 
 `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are injected by the platform.
 **Never** put the service-role key in the frontend — it bypasses row-level

@@ -58,4 +58,15 @@ alter table users  enable row level security;
 alter table scores enable row level security;
 
 -- Anonymous/browser clients may read the leaderboard view only.
-grant select on daily_leaderboard to anon, authenticated;
+-- Guarded so the migration also applies on a plain Postgres (local test, CI),
+-- where Supabase's `anon`/`authenticated` roles don't exist.
+do $$
+begin
+  if exists (select 1 from pg_roles where rolname = 'anon') then
+    grant select on daily_leaderboard to anon;
+  end if;
+  if exists (select 1 from pg_roles where rolname = 'authenticated') then
+    grant select on daily_leaderboard to authenticated;
+  end if;
+end
+$$;
