@@ -1,4 +1,4 @@
-# Supabase backend (Phases 1-2)
+# Supabase backend (Phases 1-3)
 
 Server side of the multi-user build. See `tabletop-trainer/docs/MULTIPLAYER.md`
 for the full architecture.
@@ -6,6 +6,8 @@ for the full architecture.
 ```
 migrations/0001_init.sql      users · daily_sets · scores · daily_leaderboard view
 migrations/0002_subscriptions.sql  token indexes · daily_sends · signup guard
+functions/login/              POST: email a magic sign-in link (scope 'session')
+functions/leaderboard/        GET:  public standings, display names only
 functions/subscribe/          POST: start double opt-in, mail a confirm link
 functions/confirm/            GET:  complete opt-in (single-use token)
 functions/unsubscribe/        GET+POST: stop mail (RFC 8058 one-click)
@@ -114,8 +116,23 @@ Retire the GitHub Action mailer once this is live — two schedulers sending the
 same mail is exactly the double-send the claim table is designed to prevent, but
 there's no reason to rely on it.
 
+## Identity (Phase 3)
+
+There is no password anywhere, and no Supabase Auth dependency in the browser.
+Identity is the same HMAC token the mailer already mints, with a scope:
+
+- `play`    — in daily email links. Valid only for its own puzzle date.
+- `session` — from `POST /login`. 30 days, not day-scoped.
+
+`submit-score` accepts either and reads the email from the *verified payload*,
+so a caller can only ever score as themselves. Scopes are enforced on
+verification, so a forwarded daily link cannot be replayed as a durable login.
+
+The browser stores the token from `?t=` in localStorage and strips it from the
+URL, so it does not linger in the address bar, screenshots, or `Referer`.
+
 ## Not built yet (later phases)
 
-Magic-link login for visiting the site directly, the leaderboard UI, and wiring
-the play-token into score submission. Phases 1-2 deliver the schema, the trust
-model, the grading path, and the full subscription lifecycle.
+Streaks, shareable result cards, and profile/display-name editing. Phases 1-3
+deliver the schema, the trust model, grading, the subscription lifecycle,
+passwordless identity, and the leaderboard.

@@ -17,18 +17,13 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { gradeSubmission } from '../_shared/engine/index.ts';
 import { json, preflight } from '../_shared/http.ts';
+import { dailySeeds, utcDate, verifyPlayToken } from '../_shared/server/tokens.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-/** The day's seeds must match what the mailer generated — derived, not trusted. */
-function seedsFor(date: string): string[] {
-  return Array.from({ length: 5 }, (_, i) => `daily-${date}-${i + 1}`);
-}
-
-function todayUtc(): string {
-  return new Date().toISOString().slice(0, 10);
-}
+// Seeds and the day boundary come from the shared module, so the mailer and the
+// grader can never drift apart on what "today's puzzle 3" means.
 
 Deno.serve(async (req) => {
   // The static site calls this cross-origin, so preflight must be answered.
@@ -37,12 +32,21 @@ Deno.serve(async (req) => {
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
-  // --- Identify the player from their token; never from the request body. ---
+  // --- Identify the player from their signed token; never from the body. ---
+  // Accepts either the emailed daily link ('play') or a magic-link sign-in
+  // ('session'). The email is read from the verified payload, so a caller can
+  // only ever score as themselves.
+  const signingSecret = Deno.env.get('PLAY_TOKEN_SECRET');
+  if (!signingSecret) return json({ error: 'server not configured' }, 500);
+
   const token = req.headers.get('Authorization')?.replace(/^Bearer\s+/i, '');
   if (!token) return json({ error: 'missing authorization' }, 401);
-  const { data: auth, error: authError } = await admin.auth.getUser(token);
-  if (authError || !auth?.user?.email) return json({ error: 'invalid session' }, 401);
-  const email = auth.user.email.toLowerCase();
+
+  const claims =
+    (await verifyPlayToken(token, signingSecret, Date.now(), 'session')) ??
+    (await verifyPlayToken(token, signingSecret, Date.now(), 'play'));
+  if (!claims) return json({ error: 'invalid or expired sign-in' }, 401);
+  const email = claims.email;
 
   let body: { seed?: string; puzzleIndex?: number; turns?: unknown };
   try {
@@ -51,14 +55,19 @@ Deno.serve(async (req) => {
     return json({ error: 'invalid JSON body' }, 400);
   }
 
-  const puzzleDate = todayUtc();
+  const puzzleDate = utcDate();
+  // A daily-link token is valid only for its own puzzle date; a session token
+  // is not day-scoped and may submit any day it is used on.
+  if ((claims.scope ?? 'play') === 'play' && claims.date !== puzzleDate) {
+    return json({ error: 'that link is for a different day’s puzzles' }, 403);
+  }
   const puzzleIndex = Number(body.puzzleIndex);
   if (!Number.isInteger(puzzleIndex) || puzzleIndex < 1 || puzzleIndex > 5) {
     return json({ error: 'puzzleIndex must be 1-5' }, 400);
   }
 
   // Pin the seed to today's set: a client cannot submit an easier board.
-  const expectedSeed = seedsFor(puzzleDate)[puzzleIndex - 1];
+  const expectedSeed = dailySeeds(puzzleDate)[puzzleIndex - 1];
   if (body.seed !== expectedSeed) {
     return json({ error: 'seed does not match today’s puzzle' }, 400);
   }

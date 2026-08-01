@@ -180,6 +180,8 @@ unsubscribe/bounce handling, deliverability risk). Move to a provider:
 
 ## Phased delivery plan
 
+*Status: phases 1-3 are implemented. See `supabase/README.md` for the built system.*
+
 1. **Extract the engine** into a shared package importable by web + server. No
    behaviour change; add a server entry that grades a submitted move sequence.
 2. **Stand up Supabase**: create the tables above; add a subscribe form + the

@@ -74,6 +74,24 @@ describe('normalization', () => {
   });
 });
 
+describe('token scopes', () => {
+  it('rejects a play token where a session token is required, and vice versa', async () => {
+    const play = await signPlayToken({ ...payload, scope: 'play' }, SECRET);
+    const session = await signPlayToken({ ...payload, scope: 'session' }, SECRET);
+
+    expect(await verifyPlayToken(play, SECRET, Date.now(), 'session')).toBeNull();
+    expect(await verifyPlayToken(session, SECRET, Date.now(), 'play')).toBeNull();
+    expect(await verifyPlayToken(play, SECRET, Date.now(), 'play')).not.toBeNull();
+    expect(await verifyPlayToken(session, SECRET, Date.now(), 'session')).not.toBeNull();
+  });
+
+  it('treats a scope-less token as play, so old links keep working', async () => {
+    const legacy = await signPlayToken(payload, SECRET);
+    expect(await verifyPlayToken(legacy, SECRET, Date.now(), 'play')).not.toBeNull();
+    expect(await verifyPlayToken(legacy, SECRET, Date.now(), 'session')).toBeNull();
+  });
+});
+
 describe('timingSafeEqual', () => {
   it('matches identical strings and rejects any difference', () => {
     expect(timingSafeEqual('correct-horse', 'correct-horse')).toBe(true);

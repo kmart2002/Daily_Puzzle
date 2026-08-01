@@ -11,6 +11,15 @@
  *     day would be wasteful to persist, and they should expire on their own.
  */
 
+/**
+ * `play`    — emailed daily links; scoped to one puzzle date, short-lived.
+ * `session` — magic-link sign-in; long-lived, not tied to a single day.
+ *
+ * Scopes are checked on verification so a token minted for one purpose can't be
+ * replayed for the other (e.g. a forwarded daily link becoming a durable login).
+ */
+export type TokenScope = 'play' | 'session';
+
 export interface PlayTokenPayload {
   /** Normalized subscriber email this token authenticates. */
   email: string;
@@ -18,6 +27,8 @@ export interface PlayTokenPayload {
   date: string;
   /** Expiry, epoch milliseconds. */
   exp: number;
+  /** Defaults to 'play' when absent, for tokens minted before scopes existed. */
+  scope?: TokenScope;
 }
 
 const encoder = new TextEncoder();
@@ -66,6 +77,7 @@ export async function verifyPlayToken(
   token: string,
   secret: string,
   nowMs: number = Date.now(),
+  requiredScope?: TokenScope,
 ): Promise<PlayTokenPayload | null> {
   if (!secret || typeof token !== 'string') return null;
   const parts = token.split('.');
@@ -101,6 +113,7 @@ export async function verifyPlayToken(
     return null;
   }
   if (nowMs > candidate.exp) return null;
+  if (requiredScope && (candidate.scope ?? 'play') !== requiredScope) return null;
   return candidate as PlayTokenPayload;
 }
 

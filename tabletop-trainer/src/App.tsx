@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { EdgeKey } from './engine/catan/board';
 import { hints } from './engine/catan/coach';
 import { describeVertex, roadCandidates } from './engine/catan/evaluate';
@@ -8,6 +8,13 @@ import { VertexKey } from './engine/catan/types';
 import { BoardView, Overlay } from './ui/BoardView';
 import { CoachPanel } from './ui/CoachPanel';
 import { SubscribeCard } from './ui/SubscribeCard';
+import { LeaderboardPanel } from './ui/LeaderboardPanel';
+import { apiConfigured, submitScore } from './ui/api';
+import { captureSessionToken, isSignedIn } from './ui/session';
+
+// Promote an emailed `?t=` token into session storage and strip it from the
+// URL. Runs at module load, before any component reads the query string.
+captureSessionToken();
 
 export const DAILY_SET_SIZE = 5;
 
@@ -55,6 +62,7 @@ export default function App() {
     setSession(createSession(newSeed));
     setHintsShown(false);
     setFocusStep(null);
+    setSubmitState({ status: 'idle' });
   }
 
   function handlePlace(vertex: VertexKey) {
@@ -66,6 +74,41 @@ export default function App() {
     setSession((s) => placeUserRoad(s, edge));
     setHintsShown(false);
   }
+
+  // --- Score submission -------------------------------------------------
+  // Only ranked (daily) boards count, and only when the player arrived with a
+  // token. We send the MOVES, never a score: the server replays them.
+  const [submitState, setSubmitState] = useState<
+    { status: 'idle' | 'sending' } | { status: 'done' | 'error'; message: string }
+  >({ status: 'idle' });
+
+  useEffect(() => {
+    if (session.phase !== 'done' || dailyIndex < 0) return;
+    if (!apiConfigured || !isSignedIn()) return;
+
+    const turns = session.log
+      .filter((move) => move.player === session.userSeat)
+      .map((move) => ({ settlement: move.vertex, road: move.road }));
+    if (turns.length !== 2) return;
+
+    let cancelled = false;
+    setSubmitState({ status: 'sending' });
+    submitScore({ seed, puzzleIndex: dailyIndex + 1, turns })
+      .then((result) => {
+        if (!cancelled) {
+          setSubmitState({
+            status: 'done',
+            message: `Recorded ${result.points}/${result.maxPoints} points (${result.grade}).`,
+          });
+        }
+      })
+      .catch((e: Error) => {
+        if (!cancelled) setSubmitState({ status: 'error', message: e.message });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [session.phase, session.log, session.userSeat, seed, dailyIndex]);
 
   const legal = useMemo(
     () =>
@@ -215,7 +258,16 @@ export default function App() {
           onFocusStep={setFocusStep}
         />
       </main>
+      {submitState.status !== 'idle' && (
+        <p className={`submit-status${submitState.status === 'error' ? ' error' : ''}`} role="status">
+          {submitState.status === 'done' || submitState.status === 'error'
+            ? submitState.message
+            : 'Recording your score…'}
+        </p>
+      )}
+
       <footer className="app-footer">
+        <LeaderboardPanel />
         <SubscribeCard />
       </footer>
     </div>

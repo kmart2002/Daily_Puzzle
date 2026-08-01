@@ -117,6 +117,32 @@ export function renderConfirmEmail(options: ConfirmEmailOptions): string {
   );
 }
 
+export interface MagicLinkEmailOptions {
+  displayName: string;
+  signInUrl: string;
+  senderAddress: string;
+}
+
+export const MAGIC_LINK_SUBJECT = 'Your Tabletop Trainer sign-in link';
+
+export function renderMagicLinkEmail(options: MagicLinkEmailOptions): string {
+  return (
+    SHELL_OPEN +
+    header('Sign in to Tabletop Trainer') +
+    '<div style="padding:20px 24px;background:#ffffff;font:400 14px system-ui,sans-serif;color:#33302a;">' +
+    `<p style="margin:0 0 14px;">Hi ${escapeHtml(options.displayName)},</p>` +
+    '<p style="margin:0 0 18px;">Use the button below to sign in. The link works for 30 days ' +
+    'on this device — no password needed.</p>' +
+    button(options.signInUrl, 'Sign in') +
+    '<p style="margin:18px 0 0;font-size:12px;color:#8a8168;">If you didn’t ask to sign in, ' +
+    'you can ignore this email — the link only works from your inbox.</p>' +
+    '</div>' +
+    '<div style="padding:14px 24px;font:400 12px system-ui,sans-serif;color:#8a8168;">' +
+    `${escapeHtml(options.senderAddress)}</div>` +
+    '</div>'
+  );
+}
+
 /**
  * Unsubscribe needs an explicit click, not a bare GET.
  *
