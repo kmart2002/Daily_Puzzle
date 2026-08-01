@@ -47,14 +47,17 @@ Deno.serve(async (req) => {
   );
 
   // --- Rate limit per address per day ---
-  const { data: attempt } = await admin
-    .from('subscribe_attempts')
-    .select('attempts')
-    .eq('email', email)
-    .eq('attempted_on', new Date().toISOString().slice(0, 10))
-    .maybeSingle();
-  if ((attempt?.attempts ?? 0) >= MAX_ATTEMPTS_PER_DAY) return json(GENERIC_OK);
-  await admin.rpc('bump_subscribe_attempt', { p_email: email }).catch(() => undefined);
+  // Increment and read in ONE statement: a check-then-write would let two
+  // concurrent requests both observe the old count and slip past the cap.
+  // Capping by address also stops this endpoint being used to mail-bomb someone.
+  const { data: attempts, error: attemptError } = await admin.rpc('bump_subscribe_attempt', {
+    p_email: email,
+  });
+  if (attemptError) {
+    console.error('rate-limit check failed', attemptError);
+    return json({ error: 'Could not process that signup. Try again shortly.' }, 500);
+  }
+  if (typeof attempts === 'number' && attempts > MAX_ATTEMPTS_PER_DAY) return json(GENERIC_OK);
 
   const { data: existing } = await admin
     .from('users')

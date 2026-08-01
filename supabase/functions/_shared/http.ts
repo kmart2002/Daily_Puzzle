@@ -5,12 +5,22 @@
  */
 // @ts-nocheck -- Deno/edge runtime types are not part of the web app's tsconfig.
 
-/** Browsers post to these functions from the static site, so CORS is required. */
+/**
+ * Browsers post to these functions from the static site, so CORS is required.
+ * Defaults to the known site origin rather than `*` — a wildcard would let any
+ * page on the internet POST to these endpoints. Set ALLOWED_ORIGIN (or `*`
+ * explicitly for local development) to override.
+ */
 export const corsHeaders = {
-  'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGIN') ?? '*',
+  'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGIN') ?? 'https://kmart2002.github.io',
   'Access-Control-Allow-Headers': 'authorization, content-type',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+  Vary: 'Origin',
 };
+
+// timingSafeEqual lives in _shared/server/tokens.ts — it's pure logic, so it
+// stays in the unit-tested module rather than here in the IO layer.
+export { timingSafeEqual } from './server/tokens.ts';
 
 export const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {

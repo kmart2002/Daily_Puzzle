@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  dailySeeds, normalizeDisplayName, normalizeEmail, signPlayToken, utcDate, verifyPlayToken,
+  dailySeeds, normalizeDisplayName, normalizeEmail, signPlayToken, timingSafeEqual, utcDate,
+  verifyPlayToken,
 } from '../tokens';
 
 const SECRET = 'test-signing-secret';
@@ -70,6 +71,21 @@ describe('normalization', () => {
     expect(normalizeDisplayName('   ')).toBeNull();
     expect(normalizeDisplayName('x'.repeat(41))).toBeNull();
     expect(normalizeDisplayName('x'.repeat(40))).toHaveLength(40);
+  });
+});
+
+describe('timingSafeEqual', () => {
+  it('matches identical strings and rejects any difference', () => {
+    expect(timingSafeEqual('correct-horse', 'correct-horse')).toBe(true);
+    expect(timingSafeEqual('correct-horse', 'correct-horsE')).toBe(false);
+    expect(timingSafeEqual('secret', 'secretsecret')).toBe(false); // length differs
+    expect(timingSafeEqual('', '')).toBe(true);
+    expect(timingSafeEqual('', 'x')).toBe(false);
+  });
+
+  it('handles multi-byte characters without throwing', () => {
+    expect(timingSafeEqual('pässwörd', 'pässwörd')).toBe(true);
+    expect(timingSafeEqual('pässwörd', 'password')).toBe(false);
   });
 });
 

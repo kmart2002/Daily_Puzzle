@@ -117,6 +117,31 @@ export function renderConfirmEmail(options: ConfirmEmailOptions): string {
   );
 }
 
+/**
+ * Unsubscribe needs an explicit click, not a bare GET.
+ *
+ * Corporate mail scanners and link-preview bots fetch every URL in an email, so
+ * a GET that unsubscribes would silently drop subscribers who never touched the
+ * link. This page makes GET inert and puts the state change behind a POST — the
+ * same verb Gmail/Yahoo use for RFC 8058 one-click, which bots do not send.
+ */
+export function renderUnsubscribeConfirmPage(actionUrl: string): string {
+  return (
+    '<!doctype html><html lang="en"><head><meta charset="utf-8" />' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1" />' +
+    '<title>Unsubscribe</title></head>' +
+    '<body style="margin:0;background:#10314a;font-family:system-ui,-apple-system,Segoe UI,sans-serif;">' +
+    '<div style="max-width:520px;margin:12vh auto;background:#f7f5ef;border-radius:16px;padding:32px;">' +
+    '<h1 style="margin:0 0 12px;font-size:22px;color:#33302a;">Unsubscribe from the daily puzzle?</h1>' +
+    '<p style="margin:0 0 20px;font-size:15px;color:#5b5443;line-height:1.5;">' +
+    'You will stop receiving the daily Catan puzzle email. You can subscribe again at any time.</p>' +
+    `<form method="post" action="${escapeHtml(actionUrl)}">` +
+    '<button type="submit" style="background:#b91c1c;color:#ffffff;border:0;font:600 15px system-ui,sans-serif;' +
+    'padding:11px 22px;border-radius:8px;cursor:pointer;">Yes, unsubscribe me</button>' +
+    '</form></div></body></html>'
+  );
+}
+
 /** Minimal HTML page returned by the confirm/unsubscribe endpoints. */
 export function renderNoticePage(title: string, message: string, appUrl?: string): string {
   return (

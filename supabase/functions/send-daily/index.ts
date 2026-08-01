@@ -15,7 +15,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { dailySeeds, signPlayToken, utcDate } from '../_shared/server/tokens.ts';
 import { dailyEmailSubject, renderDailyEmail } from '../_shared/server/email.ts';
-import { appUrl, functionsBaseUrl, json, senderAddress, sendMail } from '../_shared/http.ts';
+import {
+  appUrl, functionsBaseUrl, json, senderAddress, sendMail, timingSafeEqual,
+} from '../_shared/http.ts';
 
 /** Play tokens outlive the puzzle day a little, for late-evening players. */
 const TOKEN_TTL_MS = 36 * 60 * 60 * 1000;
@@ -24,7 +26,7 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'method not allowed' }, 405);
 
   const expectedSecret = Deno.env.get('CRON_SECRET');
-  if (!expectedSecret || req.headers.get('x-cron-secret') !== expectedSecret) {
+  if (!expectedSecret || !timingSafeEqual(req.headers.get('x-cron-secret') ?? '', expectedSecret)) {
     return json({ error: 'forbidden' }, 403);
   }
 
@@ -69,7 +71,7 @@ Deno.serve(async (req) => {
       .select('email');
 
     if (claimError) {
-      console.error('claim failed', user.email, claimError);
+      console.error('claim failed for a recipient', claimError); // no PII in logs
       failed++;
       continue;
     }
@@ -100,7 +102,7 @@ Deno.serve(async (req) => {
       sent++;
     } catch (sendError) {
       // Release the claim so the next run retries this recipient.
-      console.error('send failed', user.email, sendError);
+      console.error('send failed for a recipient', sendError); // no PII in logs
       await admin.from('daily_sends').delete().eq('puzzle_date', puzzleDate).eq('email', user.email);
       failed++;
     }

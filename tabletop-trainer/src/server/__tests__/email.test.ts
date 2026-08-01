@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   CONFIRM_SUBJECT, dailyEmailSubject, escapeHtml, renderConfirmEmail, renderDailyEmail,
-  renderNoticePage,
+  renderNoticePage, renderUnsubscribeConfirmPage,
 } from '../email';
 
 const base = {
@@ -57,6 +57,20 @@ describe('confirm email', () => {
     });
     expect(html).toContain('https://api.example.com/confirm?token=c-1');
     expect(CONFIRM_SUBJECT.length).toBeGreaterThan(0);
+  });
+});
+
+describe('unsubscribe confirmation page', () => {
+  it('puts the state change behind a POST form, so prefetching a GET is inert', () => {
+    const page = renderUnsubscribeConfirmPage('https://api.example.com/unsubscribe?token=u-1');
+    expect(page).toContain('method="post"');
+    expect(page).toContain('action="https://api.example.com/unsubscribe?token=u-1"');
+  });
+
+  it('escapes the action URL', () => {
+    const page = renderUnsubscribeConfirmPage('https://x.test/u?token=a"><script>alert(1)</script>');
+    expect(page).not.toContain('<script>alert(1)</script>');
+    expect(page).toContain('&quot;&gt;&lt;script&gt;');
   });
 });
 

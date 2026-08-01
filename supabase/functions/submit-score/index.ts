@@ -16,15 +16,10 @@
 // @ts-nocheck -- Deno/edge runtime types are not part of the web app's tsconfig.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { gradeSubmission } from '../_shared/engine/index.ts';
+import { json, preflight } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
 
 /** The day's seeds must match what the mailer generated — derived, not trusted. */
 function seedsFor(date: string): string[] {
@@ -36,6 +31,8 @@ function todayUtc(): string {
 }
 
 Deno.serve(async (req) => {
+  // The static site calls this cross-origin, so preflight must be answered.
+  if (req.method === 'OPTIONS') return preflight();
   if (req.method !== 'POST') return json({ error: 'method not allowed' }, 405);
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);

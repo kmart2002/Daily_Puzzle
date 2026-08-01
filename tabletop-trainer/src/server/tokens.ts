@@ -130,6 +130,21 @@ export function normalizeDisplayName(raw: unknown): string | null {
   return name;
 }
 
+/**
+ * Length-independent comparison for shared secrets. `===` on strings short-
+ * circuits at the first differing byte, which leaks a secret one character at a
+ * time to anyone who can measure response time. Use this for any attacker-
+ * supplied value compared against a secret (cron headers, API keys).
+ */
+export function timingSafeEqual(a: string, b: string): boolean {
+  const left = encoder.encode(a);
+  const right = encoder.encode(b);
+  let diff = left.length ^ right.length;
+  const max = Math.max(left.length, right.length);
+  for (let i = 0; i < max; i++) diff |= (left[i] ?? 0) ^ (right[i] ?? 0);
+  return diff === 0;
+}
+
 /** The five seeds for a UTC date. Mailer and grader must agree on this. */
 export function dailySeeds(date: string): string[] {
   return Array.from({ length: 5 }, (_, i) => `daily-${date}-${i + 1}`);
