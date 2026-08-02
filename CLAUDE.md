@@ -48,7 +48,6 @@ reason.
 | Top | Fable (lead session) | Architecture and API contracts, novel topology/scoring math, heuristic design, cross-cutting changes, security-sensitive work, final integration & judgment calls |
 
 Rules of thumb:
-
 - Delegate work that is **well-specified and verifiable** (tests + build must
   pass) — the lead defines the contract, the subagent fills it in.
 - Don't delegate work whose spec would be longer than the diff, or anything
