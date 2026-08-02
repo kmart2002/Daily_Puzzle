@@ -57,9 +57,13 @@ order by s.puzzle_date desc, total_points desc;
 alter table users  enable row level security;
 alter table scores enable row level security;
 
--- Anonymous/browser clients may read the leaderboard view only.
+-- Anonymous/browser clients may read the leaderboard view only. `service_role`
+-- also needs it explicitly: the `leaderboard` Edge Function reads the view with
+-- the service key, and under Supabase's current default new objects are NOT
+-- auto-granted to the Data API roles — so without this the function 500s with
+-- "permission denied for view daily_leaderboard".
 -- Guarded so the migration also applies on a plain Postgres (local test, CI),
--- where Supabase's `anon`/`authenticated` roles don't exist.
+-- where Supabase's `anon`/`authenticated`/`service_role` roles don't exist.
 do $$
 begin
   if exists (select 1 from pg_roles where rolname = 'anon') then
@@ -67,6 +71,9 @@ begin
   end if;
   if exists (select 1 from pg_roles where rolname = 'authenticated') then
     grant select on daily_leaderboard to authenticated;
+  end if;
+  if exists (select 1 from pg_roles where rolname = 'service_role') then
+    grant select on daily_leaderboard to service_role;
   end if;
 end
 $$;

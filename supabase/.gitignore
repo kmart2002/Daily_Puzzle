@@ -1,0 +1,18 @@
+# Supabase
+.branches
+.temp
+
+# dotenvx
+.env.keys
+.env.local
+.env.*.local
+
+# Local Edge Function secrets (dev only — never commit real secrets)
+functions/.env
+functions/.env.*
+!functions/.env.example
+
+# Generated at deploy/dev time by sync-shared.sh from tabletop-trainer/src —
+# the source of truth lives there, so these copies must not be committed.
+functions/_shared/engine/
+functions/_shared/server/

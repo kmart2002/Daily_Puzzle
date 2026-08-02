@@ -31,12 +31,7 @@ echo "==> Verifying the pure modules still pass their tests"
 
 # The engine and server helpers are the single source of truth. Copy rather than
 # duplicate, so grading and token logic can never drift between web and server.
-echo "==> Syncing shared modules into functions/_shared"
-rm -rf supabase/functions/_shared/engine supabase/functions/_shared/server
-cp -r tabletop-trainer/src/engine supabase/functions/_shared/engine
-cp -r tabletop-trainer/src/server supabase/functions/_shared/server
-# Test files aren't needed at the edge and would only slow cold starts.
-find supabase/functions/_shared -type d -name __tests__ -exec rm -rf {} + 2>/dev/null || true
+./supabase/sync-shared.sh
 
 echo "==> Linking project $PROJECT_REF"
 supabase link --project-ref "$PROJECT_REF"

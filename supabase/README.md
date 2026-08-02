@@ -47,6 +47,7 @@ Grading logic must exist in exactly one place — never re-implement it server-s
 ## Local setup
 
 ```bash
+./supabase/sync-shared.sh             # populate functions/_shared/{engine,server}
 supabase init && supabase start
 supabase db push                      # apply migrations/0001_init.sql
 supabase functions serve submit-score  # local function
