@@ -144,6 +144,20 @@ export function vertexEdges(v: VertexId): EdgeKey[] {
     .map((n) => edgeKey(key, n));
 }
 
+/**
+ * Every buildable road slot on the board (the 72 edges of the standard base
+ * board), de-duplicated and sorted for determinism. The UI draws these as faint
+ * guides so a player can see where any road could go, not just where roads have
+ * already been placed.
+ */
+export function boardEdges(): EdgeKey[] {
+  const set = new Set<EdgeKey>();
+  for (const k of boardVertexKeys()) {
+    for (const e of vertexEdges(parseVertexKey(k))) set.add(e);
+  }
+  return [...set].sort();
+}
+
 // --- Geometry (shared by engine and UI so they can never disagree) ---
 
 export function hexCenter(q: number, r: number, size: number): { x: number; y: number } {

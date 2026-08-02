@@ -1,4 +1,4 @@
-import { EdgeKey, edgeEndpoints, hexCorners, parseVertexKey, vertexPos } from '../engine/catan/board';
+import { boardEdges, EdgeKey, edgeEndpoints, hexCorners, parseVertexKey, vertexPos } from '../engine/catan/board';
 import { describeVertex } from '../engine/catan/evaluate';
 import { Board, PIPS, Placement, Road, TileType, VertexKey } from '../engine/catan/types';
 
@@ -237,6 +237,24 @@ export function BoardView({
               {label}
             </text>
           </g>
+        );
+      })}
+
+      {/* Road slots — every buildable edge, drawn faintly so a player can see
+          where any road could go, not only where one has already been placed. */}
+      {boardEdges().map((edge) => {
+        const [ka, kb] = edgeEndpoints(edge);
+        const seg = trimmed(positions.get(ka)!, positions.get(kb)!, 0.22);
+        return (
+          <line
+            key={`slot-${edge}`}
+            {...seg}
+            stroke="#ffffff"
+            strokeOpacity={0.18}
+            strokeWidth={3}
+            strokeLinecap="round"
+            pointerEvents="none"
+          />
         );
       })}
 

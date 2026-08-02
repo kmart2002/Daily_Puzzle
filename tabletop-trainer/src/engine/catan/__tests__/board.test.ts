@@ -1,13 +1,44 @@
 import { describe, expect, it } from 'vitest';
 import {
-  allHexCoords, boardVertexKeys, coastRing, hexCorners, parseVertexKey,
-  touchingHexes, vertexKey, vertexNeighbors, vertexPos,
+  allHexCoords, boardEdges, boardVertexKeys, coastRing, edgeEndpoints, hexCorners,
+  parseVertexKey, touchingHexes, vertexKey, vertexNeighbors, vertexPos,
 } from '../board';
 
 describe('board topology', () => {
   it('has 19 hexes and 54 vertices (standard base board)', () => {
     expect(allHexCoords()).toHaveLength(19);
     expect(boardVertexKeys()).toHaveLength(54);
+  });
+
+  it('has 72 edges, all between on-board vertices (standard base board)', () => {
+    const edges = boardEdges();
+    expect(edges).toHaveLength(72);
+    // No duplicates, and every endpoint is a real board vertex.
+    expect(new Set(edges).size).toBe(72);
+    const vertices = new Set(boardVertexKeys());
+    for (const e of edges) {
+      const [a, b] = edgeEndpoints(e);
+      expect(vertices.has(a)).toBe(true);
+      expect(vertices.has(b)).toBe(true);
+    }
+  });
+
+  it('every neighbor edge appears in the board edge set', () => {
+    const edges = new Set(boardEdges());
+    for (const key of boardVertexKeys()) {
+      for (const n of vertexNeighbors(parseVertexKey(key))) {
+        const nk = vertexKey(n);
+        if (!edges.has([key, nk].sort().join('|'))) continue; // off-board neighbor
+      }
+    }
+    // Degree sum must be twice the edge count.
+    const degree = boardVertexKeys().reduce(
+      (sum, key) => sum + vertexNeighbors(parseVertexKey(key))
+        .map(vertexKey)
+        .filter((nk) => edges.has([key, nk].sort().join('|'))).length,
+      0,
+    );
+    expect(degree).toBe(72 * 2);
   });
 
   it('every hex has 6 distinct corners', () => {

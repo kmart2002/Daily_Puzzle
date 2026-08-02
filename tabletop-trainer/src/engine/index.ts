@@ -20,8 +20,8 @@ export { PIPS, RESOURCES } from './catan/types';
 
 // Topology & geometry
 export {
-  boardVertexKeys, coastRing, edgeEndpoints, edgeKey, hexCorners, hexCenter,
-  isCoastal, parseVertexKey, touchingHexes, vertexEdges, vertexKey,
+  boardEdges, boardVertexKeys, coastRing, edgeEndpoints, edgeKey, hexCorners,
+  hexCenter, isCoastal, parseVertexKey, touchingHexes, vertexEdges, vertexKey,
   vertexNeighbors, vertexPos,
 } from './catan/board';
 export type { EdgeKey } from './catan/board';
